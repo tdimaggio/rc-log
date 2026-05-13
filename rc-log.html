@@ -1857,7 +1857,11 @@ function renderHeatmapChart() {
   }
 
   const W       = Math.max(400, container.getBoundingClientRect().width || 700);
-  const LABEL_W = 122;  // wide enough for "P1 · MATT STEFANS"
+  // LABEL_W sized dynamically to the longest driver name in this race.
+  // ~8px/char for all-caps Inter at 11px, plus ~30px for the "P12 · " prefix.
+  const longestName = Math.max(...sorted.map(r => r.driverName.length));
+  const nameTrunc   = Math.min(longestName, 18);
+  const LABEL_W     = Math.max(110, Math.min(185, nameTrunc * 8 + 32));
   const PAD_R   = 12;
   const PAD_T   = 24;  // lap number labels
   const PAD_B   = 46;  // legend (two lines)
