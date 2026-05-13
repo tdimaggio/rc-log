@@ -1022,7 +1022,7 @@ async function generateSpicyAnalysis() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 350 },
+          generationConfig: { maxOutputTokens: 600 },
         }),
       }
     );
