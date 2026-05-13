@@ -1857,10 +1857,10 @@ function renderHeatmapChart() {
   }
 
   const W       = Math.max(400, container.getBoundingClientRect().width || 700);
-  const LABEL_W = 100;
+  const LABEL_W = 122;  // wide enough for "P1 · MATT STEFANS"
   const PAD_R   = 12;
   const PAD_T   = 24;  // lap number labels
-  const PAD_B   = 34;  // legend
+  const PAD_B   = 46;  // legend (two lines)
   const ROW_H   = 32;
   const GAP     = 2;
   const cellW   = Math.min(30, Math.max(8, Math.floor((W - LABEL_W - PAD_R) / Math.max(showThru, 1))));
@@ -1881,11 +1881,10 @@ function renderHeatmapChart() {
   sorted.forEach((driver, ri) => {
     const y0    = PAD_T + ri * ROW_H;
     const color = colorOf[driver.driverName];
-    const label = driver.driverName.length > 13 ? driver.driverName.slice(0, 12) + '…' : driver.driverName;
-
-    // Pos badge + driver name label
-    parts.push(`<text x="20" y="${(y0 + ROW_H / 2 + 4).toFixed(1)}" fill="${color}" font-size="10" text-anchor="middle" opacity="0.55" data-driver="${escHtml(driver.driverName)}">P${driver.position}</text>`);
-    parts.push(`<text x="${LABEL_W - 8}" y="${(y0 + ROW_H / 2 + 4).toFixed(1)}" fill="${color}" font-size="11" text-anchor="end" font-weight="600" data-driver="${escHtml(driver.driverName)}">${escHtml(label)}</text>`);
+    // Single right-aligned label: "P1 · NAME" — no overlap possible
+    const nameStr  = driver.driverName.length > 12 ? driver.driverName.slice(0, 11) + '…' : driver.driverName;
+    const rowLabel = `P${driver.position} · ${nameStr}`;
+    parts.push(`<text x="${LABEL_W - 7}" y="${(y0 + ROW_H / 2 + 4).toFixed(1)}" fill="${color}" font-size="11" text-anchor="end" font-weight="600" data-driver="${escHtml(driver.driverName)}">${escHtml(rowLabel)}</text>`);
 
     for (let l = 1; l <= showThru; l++) {
       const t    = driver.lapTimes[l - 1];
@@ -1932,22 +1931,22 @@ function renderHeatmapChart() {
     }
   });
 
-  // Legend strip
-  const ly = PAD_T + n * ROW_H + 10;
-  const exColor = DRIVER_COLORS[0];
-  const legendItems = [
-    ['#f5c842',      '★ FL of race'],
-    [exColor,        'Personal best'],
-    [exColor + 'cc', 'Clean lap'],
-    ['#b06010',      'Slow lap'],
-    ['#cc3030',      '💥 Incident'],
-    ['#131320',      'Pit'],
+  // Legend — line 1: scale concept (no swatches, just words)
+  const ly1 = PAD_T + n * ROW_H + 13;
+  parts.push(`<text x="${LABEL_W}" y="${ly1}" fill="#32325a" font-size="10" font-style="italic">Brighter cell = closer to personal best · darker = slower</text>`);
+
+  // Legend — line 2: the 3 special fixed-color cases only
+  const ly2 = ly1 + 18;
+  const specials = [
+    { fill: '#f5c842', label: '★  Race FL' },
+    { fill: '#cc3030', label: '💥  Incident (pulses)', cls: 'hm-inc' },
+    { fill: '#131320', stroke: '#252540', label: 'Pit / filtered lap' },
   ];
   let lx = LABEL_W;
-  for (const [fc, label] of legendItems) {
-    parts.push(`<rect x="${lx.toFixed(1)}" y="${(ly - 8).toFixed(1)}" width="11" height="11" fill="${fc}" rx="2"/>`);
-    parts.push(`<text x="${(lx + 14).toFixed(1)}" y="${(ly + 2).toFixed(1)}" fill="#44447a" font-size="10">${escHtml(label)}</text>`);
-    lx += label.replace(/[^\x00-\x7F]/g, '  ').length * 5.8 + 20;
+  for (const s of specials) {
+    parts.push(`<rect${s.cls ? ` class="${s.cls}"` : ''} x="${lx}" y="${ly2 - 9}" width="12" height="12" fill="${s.fill}" stroke="${s.stroke ?? 'none'}" stroke-width="1" rx="2"/>`);
+    parts.push(`<text x="${lx + 16}" y="${ly2 + 1}" fill="#44447a" font-size="10">${escHtml(s.label)}</text>`);
+    lx += s.label.replace(/[^\x00-\x7F]/g, '  ').length * 5.6 + 24;
   }
 
   parts.push('</svg>');
