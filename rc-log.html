@@ -1006,17 +1006,33 @@ async function generateSpicyAnalysis() {
   const { results, className, heatName } = currentHeat;
   const sorted = [...results].sort((a, b) => a.position - b.position);
 
-  const summary = sorted.map(d =>
-    `P${d.position} ${d.driverName}: ${d.laps ?? '?'} laps, best ${msToStr(d.fastestLapMs)}, avg ${msToStr(d.avgLapMs)}, ${d.incidentCount} incident${d.incidentCount !== 1 ? 's' : ''}`
-  ).join('\n');
+  const winner = sorted[0];
+  const flDriver = sorted.reduce((best, d) =>
+    (d.fastestLapMs && (!best.fastestLapMs || d.fastestLapMs < best.fastestLapMs)) ? d : best, sorted[0]);
+
+  const summary = sorted.map(d => {
+    const gapMs = d.totalTimeMs && winner.totalTimeMs ? d.totalTimeMs - winner.totalTimeMs : null;
+    const gapStr = gapMs != null && gapMs > 0 ? ` (+${msToStr(gapMs)} behind)` : gapMs === 0 ? ' (winner)' : '';
+    const qual = d.qualPos != null ? `started P${d.qualPos}` : 'grid unknown';
+    const moved = d.qualPos != null ? (d.qualPos - d.position) : null;
+    const moveStr = moved != null ? (moved > 0 ? ` gained ${moved} pos` : moved < 0 ? ` lost ${Math.abs(moved)} pos` : ' held position') : '';
+    return `P${d.position} ${d.driverName}: ${d.laps ?? '?'} laps${gapStr}, best ${msToStr(d.fastestLapMs)}, avg ${msToStr(d.avgLapMs)}, ${d.incidentCount} incident${d.incidentCount !== 1 ? 's' : ''}, ${qual}${moveStr}`;
+  }).join('\n');
 
   area.innerHTML = `<span class="loading">Generating commentary…</span>`;
 
   try {
-    const prompt = `You're a sharp-tongued color commentator for RC car racing. Write 3–4 punchy sentences of race commentary. Call out the winner by name, highlight any drama or incidents, and roast the driver with the most carnage (if applicable). Be entertaining, use racing slang, keep it tight.\n\nRace: ${className}${heatName ? ' ' + heatName : ''}\n\n${summary}`;
+    const prompt = `You are a savage, witty pit-lane color commentator for local RC car club racing. Your job is to roast these results with real personality — name the drivers specifically, reference their actual lap times and gaps, mock the carnage merchants by name, and hype the winner with specifics. Write 4–6 punchy sentences. Be funny, irreverent, and use racing slang. Do NOT be generic or corporate. Every sentence should reference something specific from the data.
+
+Race: ${className}${heatName ? ' — ' + heatName : ''}
+Overall fastest lap of the race: ${flDriver.driverName} (${msToStr(flDriver.fastestLapMs)})
+Winner's race time: ${msToStr(winner.totalTimeMs)}
+
+Driver results:
+${summary}`;
 
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${encodeURIComponent(key)}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
