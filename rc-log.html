@@ -351,7 +351,7 @@
 
     /* ── Spicy analysis panel ───────────────────────────────────────── */
     #spicyPanel {
-      height: 160px;
+      height: 220px;
       min-height: 60px;
       flex-shrink: 0;
       background: #101018;
@@ -1022,7 +1022,7 @@ async function generateSpicyAnalysis() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 600 },
+          generationConfig: { maxOutputTokens: 1024 },
         }),
       }
     );
@@ -1033,7 +1033,10 @@ async function generateSpicyAnalysis() {
     }
 
     const data = await res.json();
-    area.innerHTML = escHtml(data.candidates[0].content.parts[0].text).replace(/\n/g, '<br>');
+    const candidate = data.candidates[0];
+    let text = candidate.content.parts.map(p => p.text).join('');
+    if (candidate.finishReason === 'MAX_TOKENS') text += '…';
+    area.innerHTML = escHtml(text).replace(/\n/g, '<br>');
   } catch (err) {
     area.innerHTML = `<span class="error-msg">Error: ${escHtml(err.message)}</span>`;
   }
