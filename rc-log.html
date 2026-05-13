@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RC Race Replay</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      font-family: 'Courier New', Courier, monospace;
+      background: #12121f;
+      color: #d0d0e0;
+      height: 100%;
+      overflow: hidden;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-width: 820px;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────── */
+    #header {
+      background: #1a1a2e;
+      border-bottom: 1px solid #2a2a50;
+      padding: 7px 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    #header input[type="text"] {
+      background: #0f0f23;
+      border: 1px solid #3a3a60;
+      color: #d0d0e0;
+      padding: 5px 8px;
+      font-size: 11px;
+      font-family: inherit;
+      border-radius: 3px;
+    }
+    #header input[type="text"]:focus { outline: none; border-color: #6060a0; }
+    #eventUrl  { width: 240px; }
+    #raceUrl   { width: 240px; }
+    #apiKeyInput { width: 190px; }
+
+    .btn {
+      background: #1e1e3a;
+      border: 1px solid #3a3a60;
+      color: #d0d0e0;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-family: inherit;
+      cursor: pointer;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+    .btn:hover { background: #2a2a50; }
+    .btn-primary { background: #c0392b; border-color: #c0392b; color: #fff; }
+    .btn-primary:hover { background: #e74c3c; }
+    .btn-primary:disabled { background: #5a2020; border-color: #5a2020; color: #888; cursor: default; }
+
+    .sep { color: #3a3a60; margin: 0 2px; user-select: none; }
+
+    .speed-wrap {
+      display: flex; align-items: center; gap: 6px; font-size: 11px; color: #888;
+    }
+    #speedSlider { width: 70px; accent-color: #c0392b; }
+
+    /* ── Main 3-column layout ───────────────────────────────────────── */
+    #main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Left sidebar ───────────────────────────────────────────────── */
+    #sidebar-left {
+      width: 170px;
+      min-width: 170px;
+      background: #16162a;
+      border-right: 1px solid #2a2a50;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #sidebar-left h3 {
+      font-size: 10px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 8px 10px 4px;
+      flex-shrink: 0;
+    }
+    #heatList {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 6px 8px;
+    }
+    .heat-section {
+      font-size: 9px;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 4px 3px;
+    }
+    .heat-item {
+      padding: 5px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: 3px;
+      color: #888;
+      margin-bottom: 1px;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .heat-item:hover { background: #1e1e3a; color: #c0c0d0; }
+    .heat-item.active { background: #c0392b; color: #fff; }
+
+    /* ── Center ─────────────────────────────────────────────────────── */
+    #center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+    #race-header {
+      background: #16162a;
+      border-bottom: 1px solid #2a2a50;
+      padding: 8px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    #raceTitle    { font-size: 13px; font-weight: bold; color: #d0d0e0; }
+    #raceSub      { font-size: 11px; color: #666; margin-top: 2px; }
+    #lapCounter   { font-size: 20px; font-weight: bold; color: #c0392b; }
+    #raceTime     { font-size: 11px; color: #888; text-align: right; margin-top: 2px; }
+
+    #vizWrap {
+      flex: 1;
+      overflow: auto;
+      padding: 12px 16px;
+    }
+    #vizArea { min-height: 200px; }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      color: #333;
+      font-size: 12px;
+      gap: 8px;
+    }
+    .empty-state .icon { font-size: 40px; }
+
+    /* ── Right sidebar ──────────────────────────────────────────────── */
+    #sidebar-right {
+      width: 210px;
+      min-width: 210px;
+      background: #16162a;
+      border-left: 1px solid #2a2a50;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .stat-card {
+      background: #0f0f23;
+      border: 1px solid #2a2a50;
+      border-radius: 4px;
+      padding: 9px 10px;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+    .stat-card .card-title {
+      font-size: 11px;
+      color: #c0392b;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    .stat-card .card-sub {
+      font-size: 9px;
+      color: #555;
+      margin-bottom: 7px;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+      color: #888;
+    }
+    .stat-row .v { color: #d0d0e0; }
+
+    .spicy-card {
+      background: #0f0f23;
+      border: 1px solid #2a2a50;
+      border-radius: 4px;
+      padding: 9px 10px;
+      font-size: 11px;
+    }
+    .spicy-card .card-title {
+      font-size: 11px;
+      color: #f0c040;
+      font-weight: bold;
+      margin-bottom: 7px;
+    }
+    .spicy-text { color: #aaa; line-height: 1.6; }
+    .spicy-text.loading { color: #555; font-style: italic; }
+
+    .error-msg { color: #c0392b; font-size: 11px; }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #12121f; }
+    ::-webkit-scrollbar-thumb { background: #2a2a50; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────── -->
+<div id="header">
+  <input type="text" id="eventUrl" placeholder="Event URL  (view_event&id=…)" />
+  <button class="btn" onclick="loadEvent()">Load Race Night</button>
+  <span class="sep">|</span>
+  <input type="text" id="raceUrl" placeholder="Single Race URL  (view_race_result&id=…)" />
+  <button class="btn" onclick="loadSingleRace()">Load Single Race</button>
+  <span class="sep">|</span>
+  <button class="btn btn-primary" id="playBtn" onclick="togglePlay()" disabled>▶ Play</button>
+  <div class="speed-wrap">
+    Speed <input type="range" id="speedSlider" min="1" max="15" value="5">
+    <span id="speedVal">5</span>
+  </div>
+  <span class="sep">|</span>
+  <input type="text" id="apiKeyInput" placeholder="Anthropic API Key" />
+</div>
+
+<!-- ── Main ───────────────────────────────────────────────────── -->
+<div id="main">
+
+  <!-- Left sidebar -->
+  <div id="sidebar-left">
+    <h3>Race Night</h3>
+    <div id="heatList">
+      <div class="empty-state" style="height:auto;padding:20px 0;font-size:11px;color:#444;">
+        No event loaded
+      </div>
+    </div>
+  </div>
+
+  <!-- Center -->
+  <div id="center">
+    <div id="race-header">
+      <div>
+        <div id="raceTitle">—</div>
+        <div id="raceSub">Load an event or single race above</div>
+      </div>
+      <div style="text-align:right">
+        <div id="lapCounter">—</div>
+        <div id="raceTime"></div>
+      </div>
+    </div>
+    <div id="vizWrap">
+      <div id="vizArea">
+        <div class="empty-state">
+          <div class="icon">🏁</div>
+          <div>Paste a LiveRC results URL above to get started</div>
+          <div style="color:#2a2a50;font-size:10px;margin-top:4px">Works with any liverc.com subdomain</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right sidebar -->
+  <div id="sidebar-right">
+    <div id="statsArea"></div>
+    <div id="spicyArea"></div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  Constants
+// ═══════════════════════════════════════════════════════════════
+const INCIDENT_THRESHOLD_MS = 2000;
+const FLOOR_FILTER_MS       = 4600;
+const VIZ_ML  = 30;   // left margin  (position labels)
+const VIZ_MR  = 140;  // right margin (driver name labels)
+const VIZ_MT  = 16;   // top margin
+const VIZ_MB  = 30;   // bottom margin (lap number labels)
+const DRIVER_COLORS = ['#f0c040','#7ab8f5','#d04040','#40c080','#c870d8','#f09040','#60d8d8','#f06090'];
+
+// ═══════════════════════════════════════════════════════════════
+//  Application State
+// ═══════════════════════════════════════════════════════════════
+let currentEvent  = null;   // { eventName, baseUrl, heats: [{raceId, label}] }
+let currentHeat   = null;   // parsed + incident-enriched race data
+let leaderLap     = 0;
+let maxLeaderLap  = 0;
+let playTimer     = null;
+let isPlaying     = false;
+
+// ═══════════════════════════════════════════════════════════════
+//  UI Helpers
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('speedSlider').addEventListener('input', function () {
+  document.getElementById('speedVal').textContent = this.value;
+  if (isPlaying) {
+    clearInterval(playTimer);
+    playTimer = setInterval(tickAnimation, tickInterval());
+  }
+});
+
+// Paste your Anthropic API key into the field above — it is saved in localStorage.
+document.getElementById('apiKeyInput').value = localStorage.getItem('rc_api_key') || '';
+document.getElementById('apiKeyInput').addEventListener('blur', () => {
+  const v = document.getElementById('apiKeyInput').value.trim();
+  if (v) localStorage.setItem('rc_api_key', v);
+});
+
+function tickInterval() {
+  const spd = parseInt(document.getElementById('speedSlider').value) || 5;
+  return Math.max(50, Math.round(1000 / spd));
+}
+
+function getApiKey() {
+  return document.getElementById('apiKeyInput').value.trim()
+      || localStorage.getItem('rc_api_key')
+      || '';
+}
+
+function msToStr(ms) {
+  if (ms == null || isNaN(ms)) return '—';
+  const s = ms / 1000;
+  if (s < 60) return s.toFixed(3) + 's';
+  const m = Math.floor(s / 60);
+  return `${m}:${(s % 60).toFixed(3).padStart(6, '0')}`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Fetch  (local proxy first, then external fallbacks)
+// ═══════════════════════════════════════════════════════════════
+async function fetchLiverc(url) {
+  const enc = encodeURIComponent(url);
+  const proxies = [
+    `http://localhost:3001/proxy?url=${enc}`,               // local proxy.mjs (best)
+    `https://api.allorigins.win/raw?url=${enc}`,            // external fallback 1
+    `https://corsproxy.io/?url=${enc}`,                     // external fallback 2
+  ];
+  let lastErr;
+  for (const proxyUrl of proxies) {
+    try {
+      const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(12000) });
+      if (res.ok) return res.text();
+      lastErr = new Error(`HTTP ${res.status} from ${proxyUrl}`);
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw new Error(`All proxies failed — try running: node proxy.mjs\n(${lastErr?.message})`);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Parse helpers (mirroring scraper.mjs)
+// ═══════════════════════════════════════════════════════════════
+function parseStatFloat(str) {
+  const m = (str || '').match(/\d+\.\d{3}/);
+  return m ? parseFloat(m[0]) : null;
+}
+
+function totalTimeToMs(str) {
+  if (!str) return null;
+  str = str.trim();
+  const mm = str.match(/^(\d+):(\d+\.\d+)$/);
+  if (mm) return Math.round((parseInt(mm[1]) * 60 + parseFloat(mm[2])) * 1000);
+  const v = parseFloat(str);
+  return isNaN(v) ? null : Math.round(v * 1000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Parse event page  →  heat list
+// ═══════════════════════════════════════════════════════════════
+function parseEventPage(html, baseUrl) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const heats = [];
+  const seen  = new Set();
+
+  doc.querySelectorAll('a').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if (!href.includes('view_race_result')) return;
+    const m = href.match(/id=(\d+)/);
+    if (!m || seen.has(m[1])) return;
+    seen.add(m[1]);
+    heats.push({ raceId: m[1], label: a.textContent.trim() });
+  });
+
+  const titleParts = (doc.querySelector('title')?.textContent || '').split('::').map(s => s.trim());
+  // "Small Scale Speedway :: Tuesday Club Race :: LiveRC" → index 1
+  const eventName = titleParts.length >= 2 ? titleParts[1] : (titleParts[0] || 'Race Night');
+
+  return { eventName, baseUrl, heats };
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Parse race result page  →  results + per-lap times
+// ═══════════════════════════════════════════════════════════════
+function parseRacePage(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+
+  // Title: "SSS :: Tuesday Club Race :: Box Stock A-Main :: LiveRC"
+  const rawTitle = doc.querySelector('title')?.textContent || '';
+  const parts = rawTitle.split('::').map(s => s.trim()).filter(s => s && s !== 'LiveRC');
+  let className = 'Unknown';
+  let heatName  = 'Unknown';
+  if (parts.length >= 1) {
+    const last = parts[parts.length - 1];
+    const hm = last.match(/^(.+?)\s+\(?([A-D]\d*-?Main|Heat\s*\d+(?:\/\d+)?|Qualifier\s*\d*|Semi.*?Final|Final)\)?$/i);
+    if (hm) {
+      className = hm[1].trim();
+      heatName  = hm[2].trim();
+    } else {
+      className = last;
+      heatName  = '';
+    }
+  }
+
+  // Results table
+  // Cols: [0]Pos [1]"Qual# Name View Laps" [2]Qual# [3]"Laps/Time"
+  //       [4]Behind [5]Fastest Lap [6]Avg Lap [7]Avg Top 5 … [12]Consistency
+  const results = [];
+  doc.querySelectorAll('table tr').forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length < 5) return;
+
+    const pos = parseInt(cells[0].textContent.trim());
+    if (isNaN(pos) || pos < 1 || pos > 99) return;
+
+    const rawDriver = cells[1].textContent
+      .replace(/view\s*laps/gi, '')
+      .replace(/^\s*\d+\s+/, '')
+      .trim()
+      .toUpperCase();
+    if (!rawDriver) return;
+
+    const qualPos = parseInt(cells[2].textContent.trim()) || null;
+
+    const lapsTimeRaw = cells[3].textContent.trim();
+    let laps = null, totalTimeMs = null;
+    const lt = lapsTimeRaw.match(/^(\d+)\/(.+)$/);
+    if (lt) {
+      laps = parseInt(lt[1]);
+      totalTimeMs = totalTimeToMs(lt[2]);
+    } else {
+      laps = parseInt(lapsTimeRaw) || null;
+    }
+
+    const fastF = parseStatFloat(cells[5]?.textContent || '');
+    const fastestLapMs = fastF ? Math.round(fastF * 1000) : null;
+
+    const avgF = parseStatFloat(cells[6]?.textContent || '');
+    const avgLapMs = avgF ? Math.round(avgF * 1000) : null;
+
+    results.push({
+      position: pos, driverName: rawDriver,
+      qualPos, laps, totalTimeMs, fastestLapMs, avgLapMs,
+      lapTimes: [], lapMeta: [],
+      incidentCount: 0, incidentRate: 0, topAvgMs: null,
+    });
+  });
+
+  // Per-lap times embedded in the page as:
+  // racerLaps[N] = { 'driverName': '...', 'laps': [{'lapNum':1,'time':'11.185',...}, ...] }
+  const lapMap = {};
+  html.split('racerLaps[').slice(1).forEach(block => {
+    const nm = block.match(/'driverName'\s*:\s*'([^']+)'/);
+    if (!nm) return;
+    const driver = nm[1].toUpperCase();
+    const lapsStart = block.indexOf("'laps'");
+    if (lapsStart === -1) return;
+    const times = [];
+    for (const m of block.slice(lapsStart).matchAll(/'time'\s*:\s*'([\d.]+)'/g)) {
+      const t = parseFloat(m[1]);
+      if (!isNaN(t) && t > 0) times.push(Math.round(t * 1000));
+    }
+    if (times.length) lapMap[driver] = times;
+  });
+
+  for (const r of results) {
+    r.lapTimes = lapMap[r.driverName] || [];
+  }
+
+  return { className, heatName, results };
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Incident computation  (matches scraper.mjs algorithm exactly)
+// ═══════════════════════════════════════════════════════════════
+function computeIncidents(results) {
+  // Step 1: collect all laps, apply floor filter
+  const allLaps = results.flatMap(r => r.lapTimes.map(t => ({ driver: r.driverName, t })));
+  const floored = allLaps.filter(l => l.t >= FLOOR_FILTER_MS);
+  if (!floored.length) return;
+
+  // Step 2: heat-wide average for ceiling filter
+  const heatAvg = floored.reduce((s, l) => s + l.t, 0) / floored.length;
+  const ceiling = 3 * heatAvg;
+
+  // Step 3: per-driver valid laps
+  const validByDriver = new Map();
+  for (const l of floored) {
+    if (l.t <= ceiling) {
+      if (!validByDriver.has(l.driver)) validByDriver.set(l.driver, []);
+      validByDriver.get(l.driver).push(l.t);
+    }
+  }
+
+  // Step 4: per-driver top-5 avg + incident tagging
+  for (const r of results) {
+    const valid = validByDriver.get(r.driverName) || [];
+    if (valid.length < 3) {
+      r.lapMeta = r.lapTimes.map(t => ({
+        type: t < FLOOR_FILTER_MS ? 'floor' : t > ceiling ? 'ceil' : 'clean',
+        delta: 0,
+      }));
+      continue;
+    }
+
+    const sorted  = [...valid].sort((a, b) => a - b);
+    const top5    = sorted.slice(0, Math.min(5, sorted.length));
+    const topAvg  = top5.reduce((s, t) => s + t, 0) / top5.length;
+    r.topAvgMs    = topAvg;
+
+    let cnt = 0;
+    r.lapMeta = r.lapTimes.map(t => {
+      if (t < FLOOR_FILTER_MS) return { type: 'floor', delta: 0 };
+      if (t > ceiling)         return { type: 'ceil',  delta: 0 };
+      const delta = t - (topAvg + INCIDENT_THRESHOLD_MS);
+      if (delta > 0) { cnt++; return { type: 'incident', delta }; }
+      return { type: 'clean', delta: 0 };
+    });
+    r.incidentCount = cnt;
+    r.incidentRate  = cnt / valid.length;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Color helpers
+// ═══════════════════════════════════════════════════════════════
+function incidentFill(delta) {
+  if (delta < 500)  return '#e8c200';
+  if (delta < 1500) return '#e87000';
+  if (delta < 3500) return '#d43000';
+  return '#b01020';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Position-by-lap computation
+//  Returns posMap[driverName] = [pos_at_lap0, pos_at_lap1, ...]
+//  lap 0 = grid (qualPos order), lap N = rank by cumulative time
+// ═══════════════════════════════════════════════════════════════
+function computePositionsByLap(results) {
+  const maxLap = Math.max(...results.map(r => r.lapTimes.length));
+  const posMap = {};
+
+  // Lap 0: starting grid order by qualPos
+  const grid = [...results].sort((a, b) => (a.qualPos ?? 99) - (b.qualPos ?? 99));
+  grid.forEach((r, i) => { posMap[r.driverName] = [i + 1]; });
+
+  for (let lap = 1; lap <= maxLap; lap++) {
+    const ranked = results
+      .map(r => ({
+        name: r.driverName,
+        cum: r.lapTimes.length >= lap
+          ? r.lapTimes.slice(0, lap).reduce((a, b) => a + b, 0)
+          : Infinity,
+        lapsComplete: Math.min(r.lapTimes.length, lap),
+      }))
+      // Primary: more laps = better. Secondary: lower cumulative time = better.
+      .sort((a, b) => b.lapsComplete - a.lapsComplete || a.cum - b.cum);
+
+    ranked.forEach((d, i) => { posMap[d.name].push(i + 1); });
+  }
+
+  return { posMap, maxLap };
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Position-graph Visualization  (lap-by-lap position chart)
+// ═══════════════════════════════════════════════════════════════
+function renderVisualization() {
+  const container = document.getElementById('vizArea');
+
+  if (!currentHeat || !currentHeat.results.length) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="icon">🏁</div><div>Select a race from the left panel</div>
+    </div>`;
+    return;
+  }
+
+  const results  = currentHeat.results;
+  const n        = results.length;
+  const { posMap, maxLap } = currentHeat._posMap;
+
+  const W       = Math.max(400, container.getBoundingClientRect().width || 700);
+  const trackW  = W - VIZ_ML - VIZ_MR;
+  const rowH    = Math.max(48, Math.min(80, Math.floor((300 - VIZ_MT - VIZ_MB) / Math.max(n - 1, 1))));
+  const trackH  = (n - 1) * rowH;
+  const H       = trackH + VIZ_MT + VIZ_MB;
+
+  // Coordinate helpers
+  const xAt = lap => VIZ_ML + (lap / maxLap) * trackW;
+  const yAt = pos => VIZ_MT + (pos - 1) * rowH;
+
+  // Assign stable colors by finishing position
+  const sorted = [...results].sort((a, b) => a.position - b.position);
+  const colorOf = {};
+  sorted.forEach((r, i) => { colorOf[r.driverName] = DRIVER_COLORS[i % DRIVER_COLORS.length]; });
+
+  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">`];
+
+  // ── Background grid ──────────────────────────────────────────
+  // Horizontal position lines
+  for (let p = 1; p <= n; p++) {
+    const y = yAt(p);
+    parts.push(`<line x1="${VIZ_ML}" y1="${y}" x2="${VIZ_ML + trackW}" y2="${y}" stroke="#1c1c38" stroke-width="1"/>`);
+    parts.push(`<text x="${VIZ_ML - 8}" y="${y + 4}" fill="#555" font-size="11" text-anchor="end" font-family="monospace">${p}</text>`);
+  }
+
+  // Vertical lap tick marks (every 5 laps, always include 0 and maxLap)
+  const lapStep = maxLap <= 15 ? 2 : maxLap <= 35 ? 5 : 10;
+  const tickLaps = new Set([0, maxLap]);
+  for (let l = lapStep; l < maxLap; l += lapStep) tickLaps.add(l);
+  for (const l of [...tickLaps].sort((a, b) => a - b)) {
+    const x = xAt(l);
+    parts.push(`<line x1="${x}" y1="${VIZ_MT}" x2="${x}" y2="${VIZ_MT + trackH}" stroke="#1c1c38" stroke-dasharray="2,4" stroke-width="1"/>`);
+    parts.push(`<text x="${x}" y="${VIZ_MT + trackH + 16}" fill="#555" font-size="10" text-anchor="middle" font-family="monospace">${l}</text>`);
+  }
+  // "Laps" axis label
+  parts.push(`<text x="${VIZ_ML + trackW / 2}" y="${H - 2}" fill="#444" font-size="9" text-anchor="middle" font-family="monospace">Laps</text>`);
+
+  // ── Driver lines ─────────────────────────────────────────────
+  const showThru = Math.min(leaderLap, maxLap); // draw up to this lap
+
+  results.forEach(driver => {
+    const color = colorOf[driver.driverName];
+    const dPos  = posMap[driver.driverName]; // array indexed 0..maxLap
+    if (!dPos) return;
+
+    // Build polyline through lap 0..showThru
+    const pts = [];
+    for (let l = 0; l <= showThru; l++) {
+      if (dPos[l] == null) break;
+      pts.push(`${xAt(l).toFixed(1)},${yAt(dPos[l]).toFixed(1)}`);
+    }
+    if (pts.length >= 2) {
+      parts.push(`<polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>`);
+    }
+
+    // Dots at each lap
+    for (let l = 0; l <= showThru; l++) {
+      if (dPos[l] == null) break;
+      const x  = xAt(l);
+      const y  = yAt(dPos[l]);
+      // lapMeta index = l-1 (lap 0 has no lap time)
+      const meta = l > 0 ? (driver.lapMeta?.[l - 1] ?? { type: 'clean', delta: 0 }) : null;
+      const isIncident = meta?.type === 'incident';
+      const r   = isIncident ? 5.5 : 3.5;
+      const dotColor = isIncident ? '#ff3030' : color;
+      const tip = l === 0
+        ? `Grid P${dPos[l]}: ${escHtml(driver.driverName)}`
+        : `Lap ${l}: P${dPos[l]}  ${msToStr(driver.lapTimes[l - 1])}${isIncident ? `  ⚠ +${(meta.delta / 1000).toFixed(1)}s` : ''}`;
+
+      parts.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${dotColor}" stroke="${isIncident ? '#ff0000' : color}" stroke-width="${isIncident ? 1.5 : 0.8}" opacity="0.95"><title>${tip}</title></circle>`);
+
+      // Fastest-lap tag
+      if (l > 0 && driver.fastestLapMs && driver.lapTimes[l - 1] === driver.fastestLapMs
+          && driver.lapTimes.indexOf(driver.fastestLapMs) === l - 1) {
+        parts.push(`<text x="${x.toFixed(1)}" y="${(y - r - 3).toFixed(1)}" fill="#f0c040" font-size="8" text-anchor="middle" font-family="monospace">FL</text>`);
+      }
+    }
+
+    // Driver name label at the current end of line
+    if (showThru > 0 && dPos[showThru] != null) {
+      const ex = xAt(showThru);
+      const ey = yAt(dPos[showThru]);
+      const label = driver.driverName.length > 15 ? driver.driverName.slice(0, 14) + '…' : driver.driverName;
+      // Color swatch rect + name
+      parts.push(`<rect x="${(ex + 7).toFixed(1)}" y="${(ey - 7).toFixed(1)}" width="8" height="8" fill="${color}" rx="1"/>`);
+      parts.push(`<text x="${(ex + 18).toFixed(1)}" y="${(ey + 3).toFixed(1)}" fill="${color}" font-size="10" font-family="monospace" font-weight="bold">${escHtml(label)}</text>`);
+    }
+  });
+
+  parts.push('</svg>');
+  container.className = '';
+  container.innerHTML = parts.join('');
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Stats sidebar
+// ═══════════════════════════════════════════════════════════════
+function renderStats() {
+  const area = document.getElementById('statsArea');
+  if (!currentHeat) { area.innerHTML = ''; return; }
+
+  const { results, className, heatName } = currentHeat;
+  const sorted = [...results].sort((a, b) => a.position - b.position);
+
+  // Show winner + most-incident driver (if different)
+  const winner = sorted[0];
+  const mostIncident = sorted.reduce((a, b) => b.incidentCount > a.incidentCount ? b : a, sorted[0]);
+
+  function card(driver) {
+    const qual = driver.qualPos != null ? `Q${driver.qualPos}` : '?';
+    const net  = driver.qualPos != null ? driver.qualPos - driver.position : null;
+    const posChange = net != null
+      ? `+${Math.max(0, net)} / -${Math.max(0, -net)}`
+      : '—';
+    return `
+      <div class="stat-card">
+        <div class="card-title">${escHtml(driver.driverName)}</div>
+        <div class="card-sub">${escHtml(className)}${heatName ? ' · ' + escHtml(heatName) : ''}</div>
+        <div class="stat-row"><span>Grid → Finish</span><span class="v">${qual} → P${driver.position}</span></div>
+        <div class="stat-row"><span>Best lap</span><span class="v">${msToStr(driver.fastestLapMs)}</span></div>
+        <div class="stat-row"><span>Avg lap</span><span class="v">${msToStr(driver.avgLapMs)}</span></div>
+        <div class="stat-row"><span>Incidents</span><span class="v" style="color:${driver.incidentCount ? incidentFill(1500) : '#2ecc71'}">${driver.incidentCount} (${driver.laps ?? '?'} laps)</span></div>
+        <div class="stat-row"><span>Pos changes</span><span class="v">${posChange}</span></div>
+      </div>`;
+  }
+
+  let html = card(winner);
+  if (mostIncident.driverName !== winner.driverName && mostIncident.incidentCount > 0) {
+    html += card(mostIncident);
+  }
+  area.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Spicy Analysis  (Claude API)
+// ═══════════════════════════════════════════════════════════════
+async function generateSpicyAnalysis() {
+  const area = document.getElementById('spicyArea');
+  const key  = getApiKey();
+
+  if (!key || !currentHeat) { area.innerHTML = ''; return; }
+
+  const { results, className, heatName } = currentHeat;
+  const sorted = [...results].sort((a, b) => a.position - b.position);
+
+  const summary = sorted.map(d =>
+    `P${d.position} ${d.driverName}: ${d.laps ?? '?'} laps, best ${msToStr(d.fastestLapMs)}, avg ${msToStr(d.avgLapMs)}, ${d.incidentCount} incident${d.incidentCount !== 1 ? 's' : ''}`
+  ).join('\n');
+
+  area.innerHTML = `
+    <div class="spicy-card">
+      <div class="card-title">🔥 Spicy Analysis</div>
+      <div class="spicy-text loading">Generating commentary…</div>
+    </div>`;
+
+  try {
+    const prompt = `You're a sharp-tongued color commentator for RC car racing. Write 3–4 punchy sentences of race commentary. Call out the winner by name, highlight any drama or incidents, and roast the driver with the most carnage (if applicable). Be entertaining, use racing slang, keep it tight.\n\nRace: ${className}${heatName ? ' ' + heatName : ''}\n\n${summary}`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 350,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const text = data.content[0].text;
+
+    area.innerHTML = `
+      <div class="spicy-card">
+        <div class="card-title">🔥 Spicy Analysis</div>
+        <div class="spicy-text">${escHtml(text).replace(/\n/g, '<br>')}</div>
+      </div>`;
+  } catch (err) {
+    area.innerHTML = `
+      <div class="spicy-card">
+        <div class="card-title">🔥 Spicy Analysis</div>
+        <div class="error-msg">Error: ${escHtml(err.message)}</div>
+      </div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Animation
+// ═══════════════════════════════════════════════════════════════
+function togglePlay() {
+  if (isPlaying) {
+    clearInterval(playTimer);
+    isPlaying = false;
+    document.getElementById('playBtn').textContent = '▶ Play';
+  } else {
+    // Restart from beginning if at end
+    if (leaderLap >= maxLeaderLap) leaderLap = 0;
+    isPlaying = true;
+    document.getElementById('playBtn').textContent = '⏸ Pause';
+    playTimer = setInterval(tickAnimation, tickInterval());
+  }
+}
+
+function tickAnimation() {
+  if (leaderLap < maxLeaderLap) {
+    leaderLap++;
+    updateHeader();
+    renderVisualization();
+  } else {
+    clearInterval(playTimer);
+    isPlaying = false;
+    document.getElementById('playBtn').textContent = '▶ Play';
+  }
+}
+
+function updateHeader() {
+  const el = document.getElementById('lapCounter');
+  el.textContent = currentHeat
+    ? `Leader Lap ${leaderLap} / ${maxLeaderLap}`
+    : '—';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Heat list rendering
+// ═══════════════════════════════════════════════════════════════
+function renderHeatList() {
+  const el = document.getElementById('heatList');
+  if (!currentEvent || !currentEvent.heats.length) {
+    el.innerHTML = `<div style="padding:8px 4px;font-size:11px;color:#444">No heats found</div>`;
+    return;
+  }
+
+  // Group by "Main Events" vs qualifiers (simple heuristic)
+  const mains = currentEvent.heats.filter(h => /main|final/i.test(h.label));
+  const quals  = currentEvent.heats.filter(h => !/main|final/i.test(h.label));
+
+  let html = '';
+  if (mains.length) {
+    html += `<div class="heat-section">Main Events</div>`;
+    html += mains.map(h => heatItem(h)).join('');
+  }
+  if (quals.length) {
+    html += `<div class="heat-section">Qualifiers / Heats</div>`;
+    html += quals.map(h => heatItem(h)).join('');
+  }
+  if (!mains.length && !quals.length) {
+    html = currentEvent.heats.map(h => heatItem(h)).join('');
+  }
+
+  el.innerHTML = html;
+}
+
+function heatItem(heat) {
+  const active = currentHeat?.raceId === heat.raceId ? ' active' : '';
+  return `<div class="heat-item${active}" onclick="selectHeat('${heat.raceId}')">${escHtml(heat.label)}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Load handlers
+// ═══════════════════════════════════════════════════════════════
+async function loadEvent() {
+  const url = document.getElementById('eventUrl').value.trim();
+  if (!url) return;
+  stopAnimation();
+
+  document.getElementById('heatList').innerHTML =
+    `<div style="padding:8px 4px;font-size:11px;color:#555">Loading…</div>`;
+
+  try {
+    const baseUrl = new URL(url).origin;
+    const html = await fetchLiverc(url);
+    currentEvent = parseEventPage(html, baseUrl);
+    currentHeat  = null;
+
+    document.getElementById('raceTitle').textContent = currentEvent.eventName;
+    document.getElementById('raceSub').textContent   = `${currentEvent.heats.length} heat${currentEvent.heats.length !== 1 ? 's' : ''} — click one to load`;
+    document.getElementById('lapCounter').textContent = '—';
+    document.getElementById('raceTime').textContent   = '';
+    document.getElementById('vizArea').innerHTML      = `<div class="empty-state">
+      <div class="icon">🏁</div><div>Select a race from the left panel</div></div>`;
+    document.getElementById('statsArea').innerHTML   = '';
+    document.getElementById('spicyArea').innerHTML   = '';
+    document.getElementById('playBtn').disabled      = true;
+
+    renderHeatList();
+  } catch (err) {
+    document.getElementById('heatList').innerHTML =
+      `<div class="error-msg" style="padding:8px 4px;font-size:11px">Error: ${escHtml(err.message)}</div>`;
+  }
+}
+
+async function loadSingleRace() {
+  const url = document.getElementById('raceUrl').value.trim();
+  if (!url) return;
+  stopAnimation();
+
+  // Build a minimal currentEvent if we don't have one
+  try {
+    const baseUrl = new URL(url).origin;
+    if (!currentEvent) {
+      currentEvent = { eventName: 'Single Race', baseUrl, heats: [] };
+    }
+    await loadRaceUrl(url);
+  } catch (err) {
+    showVizError(err.message);
+  }
+}
+
+async function selectHeat(raceId) {
+  if (!currentEvent) return;
+  stopAnimation();
+  const baseUrl = currentEvent.baseUrl;
+  const url = `${baseUrl}/results/?p=view_race_result&id=${raceId}`;
+  await loadRaceUrl(url);
+}
+
+async function loadRaceUrl(url) {
+  document.getElementById('playBtn').disabled = true;
+  document.getElementById('vizArea').innerHTML = `<div class="empty-state">
+    <div class="icon" style="font-size:28px">⏳</div><div>Loading race data…</div></div>`;
+  document.getElementById('statsArea').innerHTML  = '';
+  document.getElementById('spicyArea').innerHTML  = '';
+
+  try {
+    const html = await fetchLiverc(url);
+    const race = parseRacePage(html);
+
+    if (!race.results.length) throw new Error('No results found on this page — check the URL');
+
+    computeIncidents(race.results);
+    const _posMap = computePositionsByLap(race.results);
+
+    // Inject raceId so heat list can highlight the active item
+    const m = url.match(/id=(\d+)/);
+    currentHeat = { ...race, raceId: m ? m[1] : null, _posMap };
+
+    // Ensure it's in the event's heat list (for single-race loads)
+    if (m && currentEvent && !currentEvent.heats.find(h => h.raceId === m[1])) {
+      currentEvent.heats.push({
+        raceId: m[1],
+        label: `${race.className}${race.heatName ? ' ' + race.heatName : ''}`,
+      });
+    }
+
+    const sorted = [...race.results].sort((a, b) => a.position - b.position);
+    const leader = sorted[0];
+    maxLeaderLap = leader.laps
+      ?? Math.max(...race.results.map(r => r.lapTimes.length), 1);
+    leaderLap    = maxLeaderLap;   // start fully replayed
+
+    const label = `${race.className}${race.heatName ? ' — ' + race.heatName : ''}`;
+    document.getElementById('raceTitle').textContent = label;
+    document.getElementById('raceSub').textContent   = `${race.results.length} drivers`;
+    document.getElementById('raceTime').textContent  = leader.totalTimeMs ? `Race time: ${msToStr(leader.totalTimeMs)}` : '';
+    document.getElementById('playBtn').disabled      = false;
+
+    updateHeader();
+    renderVisualization();
+    renderStats();
+    renderHeatList();       // update active highlight
+    generateSpicyAnalysis();
+  } catch (err) {
+    showVizError(err.message);
+  }
+}
+
+function showVizError(msg) {
+  document.getElementById('vizArea').innerHTML = `<div class="empty-state">
+    <div class="icon">❌</div>
+    <div class="error-msg">${escHtml(msg)}</div></div>`;
+}
+
+function stopAnimation() {
+  if (playTimer) clearInterval(playTimer);
+  isPlaying = false;
+  document.getElementById('playBtn').textContent = '▶ Play';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Resize → re-render
+// ═══════════════════════════════════════════════════════════════
+let resizeDebounce = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeDebounce);
+  resizeDebounce = setTimeout(() => { if (currentHeat) renderVisualization(); }, 120);
+});
+</script>
+</body>
+</html>

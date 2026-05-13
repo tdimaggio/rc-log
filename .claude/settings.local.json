@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/tony/Projects/tdclaw -type f | head -60)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(node proxy.mjs)",
+      "Bash(curl -s \"http://localhost:3001/proxy?url=https%3A%2F%2Fssspeedway.liverc.com%2Fresults%2F%3Fp%3Dview_race_result%26id%3D6755593\")",
+      "Bash(lsof -ti:3001)",
+      "Bash(xargs kill -9)",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git add *)"
+    ]
+  }
+}
