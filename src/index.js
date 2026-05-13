@@ -1,7 +1,15 @@
-export async function onRequest(context) {
-  const { request } = context;
-  const url = new URL(request.url);
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
 
+    if (url.pathname === '/proxy') return handleProxy(request);
+    if (url.pathname === '/env')   return handleEnv(env);
+
+    return env.ASSETS.fetch(request);
+  },
+};
+
+async function handleProxy(request) {
   if (request.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -16,10 +24,9 @@ export async function onRequest(context) {
     return new Response('GET only', { status: 405 });
   }
 
+  const url = new URL(request.url);
   const target = url.searchParams.get('url');
-  if (!target) {
-    return new Response('Bad request: missing ?url=', { status: 400 });
-  }
+  if (!target) return new Response('Bad request: missing ?url=', { status: 400 });
 
   let targetUrl;
   try {
@@ -52,4 +59,17 @@ export async function onRequest(context) {
   } catch (e) {
     return new Response(`Upstream error: ${e.message}`, { status: 502 });
   }
+}
+
+async function handleEnv(env) {
+  return new Response(
+    JSON.stringify({ GEMINI_KEY: env.GEMINI_KEY || '' }),
+    {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    }
+  );
 }
