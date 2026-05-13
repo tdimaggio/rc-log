@@ -4,15 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RC Race Replay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
-      font-family: 'Courier New', Courier, monospace;
-      background: #12121f;
-      color: #d0d0e0;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: #0d0d14;
+      color: #dddde8;
       height: 100%;
       overflow: hidden;
+      font-size: 13px;
     }
     body {
       display: flex;
@@ -22,51 +25,54 @@
 
     /* ── Header ─────────────────────────────────────────────────────── */
     #header {
-      background: #1a1a2e;
-      border-bottom: 1px solid #2a2a50;
-      padding: 7px 12px;
+      background: #12121c;
+      border-bottom: 1px solid #1e1e32;
+      padding: 10px 16px;
       display: flex;
-      gap: 8px;
+      gap: 10px;
       align-items: center;
       flex-wrap: wrap;
       flex-shrink: 0;
     }
     #header input[type="text"] {
-      background: #0f0f23;
-      border: 1px solid #3a3a60;
-      color: #d0d0e0;
-      padding: 5px 8px;
-      font-size: 11px;
+      background: #0a0a12;
+      border: 1px solid #28284a;
+      color: #dddde8;
+      padding: 7px 11px;
+      font-size: 13px;
       font-family: inherit;
-      border-radius: 3px;
+      border-radius: 7px;
+      transition: border-color 0.15s, background 0.15s;
     }
-    #header input[type="text"]:focus { outline: none; border-color: #6060a0; }
-    #eventUrl  { width: 240px; }
-    #raceUrl   { width: 240px; }
-    #apiKeyInput { width: 190px; }
+    #header input[type="text"]:focus { outline: none; border-color: #5050a0; background: #0f0f1e; }
+    #eventUrl  { width: 260px; }
+    #raceUrl   { width: 260px; }
+    #apiKeyInput { width: 210px; }
 
     .btn {
-      background: #1e1e3a;
-      border: 1px solid #3a3a60;
-      color: #d0d0e0;
-      padding: 5px 10px;
-      font-size: 11px;
+      background: #1c1c30;
+      border: 1px solid #2c2c50;
+      color: #b8b8d0;
+      padding: 7px 14px;
+      font-size: 13px;
       font-family: inherit;
+      font-weight: 500;
       cursor: pointer;
-      border-radius: 3px;
+      border-radius: 7px;
       white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s;
     }
-    .btn:hover { background: #2a2a50; }
+    .btn:hover { background: #252540; border-color: #3c3c68; color: #dddde8; }
     .btn-primary { background: #c0392b; border-color: #c0392b; color: #fff; }
-    .btn-primary:hover { background: #e74c3c; }
-    .btn-primary:disabled { background: #5a2020; border-color: #5a2020; color: #888; cursor: default; }
+    .btn-primary:hover { background: #e74c3c; border-color: #e74c3c; }
+    .btn-primary:disabled { background: #4a1a18; border-color: #4a1a18; color: #666; cursor: default; }
 
-    .sep { color: #3a3a60; margin: 0 2px; user-select: none; }
+    .sep { color: #242440; margin: 0 4px; user-select: none; }
 
     .speed-wrap {
-      display: flex; align-items: center; gap: 6px; font-size: 11px; color: #888;
+      display: flex; align-items: center; gap: 8px; font-size: 13px; color: #66669a;
     }
-    #speedSlider { width: 70px; accent-color: #c0392b; }
+    #speedSlider { width: 80px; accent-color: #e53935; }
 
     /* ── Main 3-column layout ───────────────────────────────────────── */
     #main {
@@ -77,48 +83,51 @@
 
     /* ── Left sidebar ───────────────────────────────────────────────── */
     #sidebar-left {
-      width: 170px;
-      min-width: 170px;
-      background: #16162a;
-      border-right: 1px solid #2a2a50;
+      width: 190px;
+      min-width: 190px;
+      background: #101018;
+      border-right: 1px solid #1e1e32;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
     #sidebar-left h3 {
       font-size: 10px;
-      color: #666;
+      font-weight: 600;
+      color: #44447a;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 8px 10px 4px;
+      letter-spacing: 1.5px;
+      padding: 12px 12px 6px;
       flex-shrink: 0;
     }
     #heatList {
       flex: 1;
       overflow-y: auto;
-      padding: 0 6px 8px;
+      padding: 0 8px 8px;
     }
     .heat-section {
-      font-size: 9px;
-      color: #444;
+      font-size: 10px;
+      font-weight: 600;
+      color: #32325a;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 8px 4px 3px;
+      letter-spacing: 1px;
+      padding: 10px 6px 4px;
     }
     .heat-item {
-      padding: 5px 8px;
-      font-size: 11px;
+      padding: 7px 10px;
+      font-size: 12px;
       cursor: pointer;
-      border-radius: 3px;
-      color: #888;
-      margin-bottom: 1px;
-      line-height: 1.3;
+      border-radius: 6px;
+      color: #66669a;
+      margin-bottom: 2px;
+      line-height: 1.4;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      transition: background 0.1s, color 0.1s;
     }
-    .heat-item:hover { background: #1e1e3a; color: #c0c0d0; }
-    .heat-item.active { background: #c0392b; color: #fff; }
+    .heat-item:hover { background: #1a1a2e; color: #c0c0d8; }
+    .heat-item.active { background: #c0392b; color: #fff; font-weight: 500; }
 
     /* ── Center ─────────────────────────────────────────────────────── */
     #center {
@@ -129,23 +138,23 @@
       min-width: 0;
     }
     #race-header {
-      background: #16162a;
-      border-bottom: 1px solid #2a2a50;
-      padding: 8px 14px;
+      background: #101018;
+      border-bottom: 1px solid #1e1e32;
+      padding: 10px 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-shrink: 0;
     }
-    #raceTitle    { font-size: 13px; font-weight: bold; color: #d0d0e0; }
-    #raceSub      { font-size: 11px; color: #666; margin-top: 2px; }
-    #lapCounter   { font-size: 20px; font-weight: bold; color: #c0392b; }
-    #raceTime     { font-size: 11px; color: #888; text-align: right; margin-top: 2px; }
+    #raceTitle    { font-size: 15px; font-weight: 600; color: #e8e8f4; }
+    #raceSub      { font-size: 12px; color: #44447a; margin-top: 3px; }
+    #lapCounter   { font-size: 22px; font-weight: 700; color: #e53935; letter-spacing: -0.5px; }
+    #raceTime     { font-size: 12px; color: #66669a; text-align: right; margin-top: 3px; }
 
     #vizWrap {
       flex: 1;
       overflow: auto;
-      padding: 12px 16px;
+      padding: 14px 18px;
     }
     #vizArea { min-height: 200px; }
 
@@ -155,71 +164,93 @@
       align-items: center;
       justify-content: center;
       height: 300px;
-      color: #333;
-      font-size: 12px;
-      gap: 8px;
+      color: #2a2a48;
+      font-size: 13px;
+      gap: 10px;
     }
-    .empty-state .icon { font-size: 40px; }
+    .empty-state .icon { font-size: 44px; }
 
     /* ── Right sidebar ──────────────────────────────────────────────── */
     #sidebar-right {
-      width: 210px;
-      min-width: 210px;
-      background: #16162a;
-      border-left: 1px solid #2a2a50;
+      width: 225px;
+      min-width: 225px;
+      background: #101018;
+      border-left: 1px solid #1e1e32;
       overflow-y: auto;
-      padding: 8px;
+      padding: 10px;
     }
 
     .stat-card {
-      background: #0f0f23;
-      border: 1px solid #2a2a50;
-      border-radius: 4px;
-      padding: 9px 10px;
-      margin-bottom: 8px;
-      font-size: 11px;
+      background: #0a0a12;
+      border: 1px solid #1e1e32;
+      border-radius: 9px;
+      padding: 12px 13px;
+      margin-bottom: 10px;
+      font-size: 12px;
     }
     .stat-card .card-title {
-      font-size: 11px;
-      color: #c0392b;
-      font-weight: bold;
+      font-size: 13px;
+      color: #e53935;
+      font-weight: 600;
       margin-bottom: 2px;
     }
     .stat-card .card-sub {
-      font-size: 9px;
-      color: #555;
-      margin-bottom: 7px;
+      font-size: 11px;
+      color: #36365e;
+      margin-bottom: 9px;
     }
     .stat-row {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 3px;
-      color: #888;
+      margin-bottom: 5px;
+      color: #55558a;
     }
-    .stat-row .v { color: #d0d0e0; }
+    .stat-row .v { color: #dddde8; }
 
     .spicy-card {
-      background: #0f0f23;
-      border: 1px solid #2a2a50;
-      border-radius: 4px;
-      padding: 9px 10px;
-      font-size: 11px;
+      background: #0a0a12;
+      border: 1px solid #1e1e32;
+      border-radius: 9px;
+      padding: 12px 13px;
+      font-size: 12px;
     }
     .spicy-card .card-title {
-      font-size: 11px;
-      color: #f0c040;
-      font-weight: bold;
-      margin-bottom: 7px;
+      font-size: 13px;
+      color: #f5c842;
+      font-weight: 600;
+      margin-bottom: 9px;
     }
-    .spicy-text { color: #aaa; line-height: 1.6; }
-    .spicy-text.loading { color: #555; font-style: italic; }
+    .spicy-text { color: #8888b0; line-height: 1.7; }
+    .spicy-text.loading { color: #36365e; font-style: italic; }
 
-    .error-msg { color: #c0392b; font-size: 11px; }
+    .error-msg { color: #e53935; font-size: 12px; }
+
+    /* ── Tooltip ────────────────────────────────────────────────────── */
+    #tooltip {
+      position: fixed;
+      pointer-events: none;
+      background: #12121e;
+      border: 1px solid #2a2a50;
+      border-radius: 9px;
+      padding: 10px 13px;
+      font-size: 12px;
+      color: #dddde8;
+      z-index: 1000;
+      display: none;
+      min-width: 170px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+    }
+    .tt-driver { font-weight: 700; font-size: 13px; margin-bottom: 7px; }
+    .tt-row { display: flex; justify-content: space-between; gap: 14px; margin-bottom: 4px; color: #55558a; }
+    .tt-row .tt-v { color: #dddde8; font-variant-numeric: tabular-nums; }
+    .tt-divider { border: none; border-top: 1px solid #1e1e35; margin: 6px 0; }
+    .tt-badge { font-size: 11px; margin-top: 5px; }
 
     /* scrollbar */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: #12121f; }
-    ::-webkit-scrollbar-thumb { background: #2a2a50; border-radius: 3px; }
+    ::-webkit-scrollbar-track { background: #0d0d14; }
+    ::-webkit-scrollbar-thumb { background: #222240; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2e2e55; }
   </style>
 </head>
 <body>
@@ -284,6 +315,7 @@
   </div>
 
 </div>
+<div id="tooltip"></div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -561,6 +593,19 @@ function incidentFill(delta) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  Star polygon helper  (for fastest-lap marker)
+// ═══════════════════════════════════════════════════════════════
+function starPoints(cx, cy, outerR, innerR) {
+  const pts = [];
+  for (let i = 0; i < 10; i++) {
+    const angle = (i * Math.PI / 5) - Math.PI / 2;
+    const r = i % 2 === 0 ? outerR : innerR;
+    pts.push(`${(cx + r * Math.cos(angle)).toFixed(1)},${(cy + r * Math.sin(angle)).toFixed(1)}`);
+  }
+  return pts.join(' ');
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  Position-by-lap computation
 //  Returns posMap[driverName] = [pos_at_lap0, pos_at_lap1, ...]
 //  lap 0 = grid (qualPos order), lap N = rank by cumulative time
@@ -629,8 +674,8 @@ function renderVisualization() {
   // Horizontal position lines
   for (let p = 1; p <= n; p++) {
     const y = yAt(p);
-    parts.push(`<line x1="${VIZ_ML}" y1="${y}" x2="${VIZ_ML + trackW}" y2="${y}" stroke="#1c1c38" stroke-width="1"/>`);
-    parts.push(`<text x="${VIZ_ML - 8}" y="${y + 4}" fill="#555" font-size="11" text-anchor="end" font-family="monospace">${p}</text>`);
+    parts.push(`<line x1="${VIZ_ML}" y1="${y}" x2="${VIZ_ML + trackW}" y2="${y}" stroke="#1a1a2e" stroke-width="1"/>`);
+    parts.push(`<text x="${VIZ_ML - 8}" y="${y + 4}" fill="#44447a" font-size="12" text-anchor="end" font-family="Inter,system-ui,sans-serif" font-weight="500">${p}</text>`);
   }
 
   // Vertical lap tick marks (every 5 laps, always include 0 and maxLap)
@@ -639,14 +684,33 @@ function renderVisualization() {
   for (let l = lapStep; l < maxLap; l += lapStep) tickLaps.add(l);
   for (const l of [...tickLaps].sort((a, b) => a - b)) {
     const x = xAt(l);
-    parts.push(`<line x1="${x}" y1="${VIZ_MT}" x2="${x}" y2="${VIZ_MT + trackH}" stroke="#1c1c38" stroke-dasharray="2,4" stroke-width="1"/>`);
-    parts.push(`<text x="${x}" y="${VIZ_MT + trackH + 16}" fill="#555" font-size="10" text-anchor="middle" font-family="monospace">${l}</text>`);
+    parts.push(`<line x1="${x}" y1="${VIZ_MT}" x2="${x}" y2="${VIZ_MT + trackH}" stroke="#1a1a2e" stroke-dasharray="2,4" stroke-width="1"/>`);
+    parts.push(`<text x="${x}" y="${VIZ_MT + trackH + 16}" fill="#44447a" font-size="11" text-anchor="middle" font-family="Inter,system-ui,sans-serif">${l}</text>`);
   }
   // "Laps" axis label
-  parts.push(`<text x="${VIZ_ML + trackW / 2}" y="${H - 2}" fill="#444" font-size="9" text-anchor="middle" font-family="monospace">Laps</text>`);
+  parts.push(`<text x="${VIZ_ML + trackW / 2}" y="${H - 2}" fill="#32325a" font-size="10" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="500">Laps</text>`);
 
   // ── Driver lines ─────────────────────────────────────────────
   const showThru = Math.min(leaderLap, maxLap); // draw up to this lap
+
+  // ── Pre-compute cumulative times and gap-to-leader at each lap ──
+  const driverCumAt = {};
+  for (const r of results) {
+    driverCumAt[r.driverName] = [null]; // lap 0 = grid start, no time
+    for (let l = 1; l <= r.lapTimes.length; l++) {
+      driverCumAt[r.driverName][l] = r.lapTimes.slice(0, l).reduce((a, b) => a + b, 0);
+    }
+  }
+  const gapAt = {};
+  for (const r of results) gapAt[r.driverName] = new Array(maxLap + 1).fill(null);
+  for (let lap = 1; lap <= maxLap; lap++) {
+    const completed = results.filter(r => driverCumAt[r.driverName][lap] != null);
+    if (!completed.length) continue;
+    const minCum = Math.min(...completed.map(r => driverCumAt[r.driverName][lap]));
+    for (const r of completed) {
+      gapAt[r.driverName][lap] = driverCumAt[r.driverName][lap] - minCum;
+    }
+  }
 
   results.forEach(driver => {
     const color = colorOf[driver.driverName];
@@ -666,23 +730,36 @@ function renderVisualization() {
     // Dots at each lap
     for (let l = 0; l <= showThru; l++) {
       if (dPos[l] == null) break;
-      const x  = xAt(l);
-      const y  = yAt(dPos[l]);
-      // lapMeta index = l-1 (lap 0 has no lap time)
+      const x   = xAt(l);
+      const y   = yAt(dPos[l]);
       const meta = l > 0 ? (driver.lapMeta?.[l - 1] ?? { type: 'clean', delta: 0 }) : null;
       const isIncident = meta?.type === 'incident';
-      const r   = isIncident ? 5.5 : 3.5;
-      const dotColor = isIncident ? '#ff3030' : color;
-      const tip = l === 0
-        ? `Grid P${dPos[l]}: ${escHtml(driver.driverName)}`
-        : `Lap ${l}: P${dPos[l]}  ${msToStr(driver.lapTimes[l - 1])}${isIncident ? `  ⚠ +${(meta.delta / 1000).toFixed(1)}s` : ''}`;
 
-      parts.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${dotColor}" stroke="${isIncident ? '#ff0000' : color}" stroke-width="${isIncident ? 1.5 : 0.8}" opacity="0.95"><title>${tip}</title></circle>`);
+      const isFl = l > 0
+        && driver.fastestLapMs != null
+        && driver.lapTimes[l - 1] === driver.fastestLapMs
+        && driver.lapTimes.indexOf(driver.fastestLapMs) === l - 1;
 
-      // Fastest-lap tag
-      if (l > 0 && driver.fastestLapMs && driver.lapTimes[l - 1] === driver.fastestLapMs
-          && driver.lapTimes.indexOf(driver.fastestLapMs) === l - 1) {
-        parts.push(`<text x="${x.toFixed(1)}" y="${(y - r - 3).toFixed(1)}" fill="#f0c040" font-size="8" text-anchor="middle" font-family="monospace">FL</text>`);
+      // Data attrs for tooltip (lap 0 = grid, no time data)
+      const lapTimeMs = l > 0 ? driver.lapTimes[l - 1] : null;
+      const gapMs     = gapAt[driver.driverName][l] ?? null;
+      const deltaMs   = l >= 2 && driver.lapTimes[l - 1] != null && driver.lapTimes[l - 2] != null
+        ? driver.lapTimes[l - 1] - driver.lapTimes[l - 2] : null;
+
+      const da = `data-lap="${l}" data-driver="${escHtml(driver.driverName)}" data-pos="${dPos[l]}" data-laptime="${lapTimeMs}" data-gap="${gapMs}" data-delta="${deltaMs}" data-color="${color}" data-incident="${isIncident ? 1 : 0}" data-fl="${isFl ? 1 : 0}"`;
+
+      if (isFl) {
+        // ★ Star for fastest lap
+        parts.push(`<polygon points="${starPoints(x, y, 7.5, 3.2)}" fill="${color}" stroke="#f5c842" stroke-width="1.8" opacity="0.97" ${da}/>`);
+      } else {
+        const r = isIncident ? 5.5 : 3.5;
+        const dotColor   = isIncident ? '#ff3030' : color;
+        const strokeColor = isIncident ? '#ff0000' : color;
+        const strokeW    = isIncident ? 1.5 : 0.8;
+        // Visible dot
+        parts.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${dotColor}" stroke="${strokeColor}" stroke-width="${strokeW}" opacity="0.95"/>`);
+        // Larger transparent hit area on top carries the data attrs
+        parts.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="9" fill="transparent" stroke="none" style="cursor:default" ${da}/>`);
       }
     }
 
@@ -692,8 +769,8 @@ function renderVisualization() {
       const ey = yAt(dPos[showThru]);
       const label = driver.driverName.length > 15 ? driver.driverName.slice(0, 14) + '…' : driver.driverName;
       // Color swatch rect + name
-      parts.push(`<rect x="${(ex + 7).toFixed(1)}" y="${(ey - 7).toFixed(1)}" width="8" height="8" fill="${color}" rx="1"/>`);
-      parts.push(`<text x="${(ex + 18).toFixed(1)}" y="${(ey + 3).toFixed(1)}" fill="${color}" font-size="10" font-family="monospace" font-weight="bold">${escHtml(label)}</text>`);
+      parts.push(`<rect x="${(ex + 7).toFixed(1)}" y="${(ey - 7).toFixed(1)}" width="8" height="8" fill="${color}" rx="2"/>`);
+      parts.push(`<text x="${(ex + 18).toFixed(1)}" y="${(ey + 3).toFixed(1)}" fill="${color}" font-size="12" font-family="Inter,system-ui,sans-serif" font-weight="600">${escHtml(label)}</text>`);
     }
   });
 
@@ -1010,6 +1087,73 @@ let resizeDebounce = null;
 window.addEventListener('resize', () => {
   clearTimeout(resizeDebounce);
   resizeDebounce = setTimeout(() => { if (currentHeat) renderVisualization(); }, 120);
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  Tooltip
+// ═══════════════════════════════════════════════════════════════
+const tooltip = document.getElementById('tooltip');
+
+document.getElementById('vizWrap').addEventListener('mousemove', e => {
+  const dot = e.target.closest('[data-lap]');
+  if (!dot) { tooltip.style.display = 'none'; return; }
+
+  const lap     = parseInt(dot.dataset.lap);
+  const color   = dot.dataset.color || '#dddde8';
+
+  if (lap === 0) {
+    // Grid start — show simple label
+    const pos = dot.dataset.pos;
+    tooltip.innerHTML = `<div class="tt-driver" style="color:${color}">${escHtml(dot.dataset.driver)}</div>
+      <div class="tt-row"><span>Grid position</span><span class="tt-v">P${pos}</span></div>`;
+  } else {
+    const lapTimeMs = parseInt(dot.dataset.laptime);
+    const gapMs     = dot.dataset.gap !== 'null' ? parseInt(dot.dataset.gap) : null;
+    const deltaMs   = dot.dataset.delta !== 'null' ? parseInt(dot.dataset.delta) : null;
+    const pos       = dot.dataset.pos;
+    const isIncident = dot.dataset.incident === '1';
+    const isFl       = dot.dataset.fl === '1';
+
+    let html = `<div class="tt-driver" style="color:${color}">${escHtml(dot.dataset.driver)}</div>`;
+    html += `<div class="tt-row"><span>Lap</span><span class="tt-v">${lap}</span></div>`;
+    html += `<div class="tt-row"><span>Position</span><span class="tt-v">P${pos}</span></div>`;
+    html += `<hr class="tt-divider">`;
+    html += `<div class="tt-row"><span>Lap time</span><span class="tt-v">${msToStr(lapTimeMs)}</span></div>`;
+
+    if (deltaMs !== null) {
+      const sign = deltaMs >= 0 ? '+' : '−';
+      const col  = deltaMs > 0 ? '#e53935' : '#4caf50';
+      html += `<div class="tt-row"><span>Δ prev lap</span><span class="tt-v" style="color:${col}">${sign}${msToStr(Math.abs(deltaMs))}</span></div>`;
+    }
+
+    if (gapMs !== null) {
+      if (gapMs === 0) {
+        html += `<div class="tt-row"><span>Gap</span><span class="tt-v" style="color:#4caf50">Leader</span></div>`;
+      } else {
+        html += `<div class="tt-row"><span>Gap to leader</span><span class="tt-v">+${msToStr(gapMs)}</span></div>`;
+      }
+    }
+
+    if (isIncident || isFl) {
+      html += `<hr class="tt-divider">`;
+      if (isFl)       html += `<div class="tt-badge" style="color:#f5c842">★ Fastest lap</div>`;
+      if (isIncident) html += `<div class="tt-badge" style="color:#e53935">⚠ Incident +${((parseInt(dot.dataset.laptime) - (currentHeat?.results.find(r => r.driverName === dot.dataset.driver)?.topAvgMs ?? 0) - 2000) / 1000).toFixed(1)}s over threshold</div>`;
+    }
+
+    tooltip.innerHTML = html;
+  }
+
+  tooltip.style.display = 'block';
+  const tx = e.clientX + 16;
+  const ty = e.clientY - 12;
+  const tw = tooltip.offsetWidth;
+  const th = tooltip.offsetHeight;
+  tooltip.style.left = (tx + tw > window.innerWidth  ? tx - tw - 32 : tx) + 'px';
+  tooltip.style.top  = (ty + th > window.innerHeight ? ty - th      : ty) + 'px';
+});
+
+document.getElementById('vizWrap').addEventListener('mouseleave', () => {
+  tooltip.style.display = 'none';
 });
 </script>
 </body>
