@@ -1022,13 +1022,20 @@ async function generateSpicyAnalysis() {
   area.innerHTML = `<span class="loading">Generating commentary…</span>`;
 
   try {
-    const prompt = `You are a savage, witty pit-lane color commentator for local RC car club racing. Your job is to roast these results with real personality — name the drivers specifically, reference their actual lap times and gaps, mock the carnage merchants by name, and hype the winner with specifics. Write 4–6 punchy sentences. Be funny, irreverent, and use racing slang. Do NOT be generic or corporate. Every sentence should reference something specific from the data.
+    const prompt = `You are a savage, funny pit-lane commentator for local RC car club racing. Roast these results with real personality. Rules:
+- Quote actual lap times and gaps (e.g. "a 9.944s best lap", "+12 seconds back")
+- Name every driver — no "a driver" or "one competitor"
+- If someone had incidents, name them and the count — make it hurt
+- Mention who held the fastest lap and by how much
+- Mention any positions gained or lost from the grid
+- Be specific, irreverent, and funny. No corporate fluff.
+- 4–6 sentences max.
 
 Race: ${className}${heatName ? ' — ' + heatName : ''}
-Overall fastest lap of the race: ${flDriver.driverName} (${msToStr(flDriver.fastestLapMs)})
-Winner's race time: ${msToStr(winner.totalTimeMs)}
+Fastest lap of the race: ${flDriver.driverName} — ${msToStr(flDriver.fastestLapMs)}
+Winner's total time: ${msToStr(winner.totalTimeMs)}
 
-Driver results:
+Results:
 ${summary}`;
 
     const res = await fetch(
@@ -1052,7 +1059,11 @@ ${summary}`;
     const candidate = data.candidates[0];
     let text = candidate.content.parts.map(p => p.text).join('');
     if (candidate.finishReason === 'MAX_TOKENS') text += '…';
-    area.innerHTML = escHtml(text).replace(/\n/g, '<br>');
+    // Render markdown bold/italic, then newlines
+    area.innerHTML = escHtml(text)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+?)\*/g, '<em>$1</em>')
+      .replace(/\n/g, '<br>');
   } catch (err) {
     area.innerHTML = `<span class="error-msg">Error: ${escHtml(err.message)}</span>`;
   }
