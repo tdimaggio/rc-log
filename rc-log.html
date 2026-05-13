@@ -314,6 +314,24 @@
     /* ── Driver highlight ───────────────────────────────────────────── */
     .stat-card { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
     .stat-card.highlighted { border-color: var(--card-color, #e53935); box-shadow: 0 0 0 1px var(--card-color, #e53935); }
+    .compact-driver-row.highlighted { background: #12122a; box-shadow: inset 3px 0 0 var(--card-color, #e53935); }
+
+    /* ── Driver hover popup ─────────────────────────────────────────── */
+    #driver-popup {
+      display: none;
+      position: fixed;
+      z-index: 300;
+      width: 200px;
+      background: #0a0a12;
+      border: 1px solid #3535a0;
+      border-radius: 9px;
+      padding: 10px 12px;
+      font-size: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.7);
+      pointer-events: none;
+    }
+    #driver-popup .dp-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    #driver-popup .dp-sparkline { margin-bottom: 8px; border-bottom: 1px solid #1e1e32; padding-bottom: 8px; }
 
     /* ── Viz cursor ─────────────────────────────────────────────────── */
     #vizWrap svg { cursor: crosshair; }
@@ -432,14 +450,6 @@
     .timing-pb  { background: #2a2800 !important; color: #f5c842 !important; }
     .timing-inc { background: #1a0808 !important; color: #e53935 !important; }
     .timing-cur { box-shadow: inset 2px 0 0 #5050a0, inset -2px 0 0 #5050a0; }
-
-    /* ── Collapsible stat cards ──────────────────────────────────── */
-    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
-    .card-collapse-btn {
-      background: none; border: none; color: #44447a; font-size: 11px;
-      cursor: pointer; padding: 0 0 0 6px; line-height: 1; flex-shrink: 0; margin-top: 1px;
-    }
-    .card-collapse-btn:hover { color: #8888b0; }
 
     /* ── Sparkline ───────────────────────────────────────────────── */
     .sparkline { display: block; margin-top: 3px; }
@@ -574,16 +584,19 @@
 
   <!-- Right sidebar -->
   <div id="sidebar-right" style="width:225px">
-    <div id="statsHeader" style="display:none;justify-content:space-between;align-items:center;padding:4px 2px 8px">
+    <div id="statsHeader" style="display:none;padding:4px 2px 4px">
       <span style="font-size:10px;font-weight:600;color:#44447a;text-transform:uppercase;letter-spacing:1.5px">Drivers</span>
-      <button id="cardsCollapseBtn" class="btn" style="font-size:10px;padding:2px 8px;line-height:1.4" onclick="toggleCardsCollapsed()">▾ Collapse</button>
     </div>
     <div id="statsArea"></div>
+    <div id="sparklineHint" style="display:none;font-size:9px;color:#44447a;font-style:italic;padding:2px 4px 10px;line-height:1.5">
+      lap times &nbsp;·&nbsp; <span style="color:#c03030">●</span> incident
+    </div>
     <div id="fastestLapsArea"></div>
   </div>
 
 </div>
 <div id="tooltip"></div>
+<div id="driver-popup"></div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -609,8 +622,6 @@ let isPlaying         = false;
 let highlightedDriver = null;   // driver name string, or null
 let chartMode         = 'position';  // 'position' | 'laptime' | 'gap' | 'pace'
 let viewMode          = 'chart';     // 'chart' | 'table'
-let cardsCollapsed    = false;
-const collapsedDrivers = new Set();
 
 // ═══════════════════════════════════════════════════════════════
 //  UI Helpers
@@ -1120,72 +1131,58 @@ function renderStats() {
   const area = document.getElementById('statsArea');
   if (!currentHeat) { area.innerHTML = ''; return; }
 
-  const { results, className, heatName } = currentHeat;
-  const sorted = [...results].sort((a, b) => a.position - b.position);
-
-  // ── Collapsed: compact rows ─────────────────────────────────
-  if (cardsCollapsed) {
-    area.innerHTML = sorted.map((driver, i) => {
-      const color  = DRIVER_COLORS[i % DRIVER_COLORS.length];
-      const safeN  = escHtml(driver.driverName).replace(/'/g, "\\'");
-      const isHL   = highlightedDriver === driver.driverName;
-      const spark  = buildSparkline(driver, color);
-      return `<div class="compact-driver-row${isHL ? ' highlighted' : ''}" style="--card-color:${color}" onclick="toggleDriverHighlight('${safeN}')">
-        <span class="compact-pos-name" style="color:${color}">P${driver.position} · ${escHtml(driver.driverName)}</span>
-        ${spark}
-      </div>`;
-    }).join('');
-    return;
-  }
-
-  // ── Expanded: full cards ────────────────────────────────────
-  function card(driver, driverColor) {
-    const qual = driver.qualPos != null ? `Q${driver.qualPos}` : '?';
-    const net  = driver.qualPos != null ? driver.qualPos - driver.position : null;
-    const posChange = net != null ? `+${Math.max(0, net)} / -${Math.max(0, -net)}` : '—';
-    const isHL = highlightedDriver === driver.driverName;
-    const isCollapsed = collapsedDrivers.has(driver.driverName);
-    const safeN = escHtml(driver.driverName).replace(/'/g, "\\'");
-    const sparkline = buildSparkline(driver, driverColor);
-    const consStr = driver.consistencyPct != null ? driver.consistencyPct.toFixed(1) + '%' : '—';
-    const consColor = driver.consistencyPct != null
-      ? (driver.consistencyPct >= 90 ? '#2ecc71' : driver.consistencyPct >= 75 ? '#f5c842' : '#e53935')
-      : '#55558a';
-    return `
-      <div class="stat-card${isHL ? ' highlighted' : ''}" style="--card-color:${driverColor}">
-        <div class="card-header">
-          <div onclick="toggleDriverHighlight('${safeN}')" style="cursor:pointer;flex:1;min-width:0">
-            <div class="card-title" style="color:${driverColor}">P${driver.position} · ${escHtml(driver.driverName)}</div>
-            ${sparkline}
-          </div>
-          <button class="card-collapse-btn" onclick="toggleCardCollapse('${safeN}')" title="Collapse/expand">${isCollapsed ? '▸' : '▾'}</button>
-        </div>
-        ${isCollapsed ? '' : `<div class="card-body">
-          <div class="card-sub" style="margin-bottom:8px">${escHtml(className)}${heatName ? ' · ' + escHtml(heatName) : ''}</div>
-          <div class="stat-row"><span>Grid → Finish</span><span class="v">${qual} → P${driver.position}</span></div>
-          <div class="stat-row"><span>Best lap</span><span class="v">${msToStr(driver.fastestLapMs)}</span></div>
-          <div class="stat-row"><span>Avg lap</span><span class="v">${msToStr(driver.avgLapMs)}</span></div>
-          <div class="stat-row"><span>Consistency</span><span class="v" style="color:${consColor}">${consStr}</span></div>
-          <div class="stat-row"><span>Incidents</span><span class="v" style="color:${driver.incidentCount ? incidentFill(1500) : '#2ecc71'}">${driver.incidentCount} (${driver.laps ?? '?'} laps)</span></div>
-          <div class="stat-row"><span>Pos changes</span><span class="v">${posChange}</span></div>
-        </div>`}
-      </div>`;
-  }
-
-  area.innerHTML = sorted.map((d, i) => card(d, DRIVER_COLORS[i % DRIVER_COLORS.length])).join('');
+  const sorted = [...currentHeat.results].sort((a, b) => a.position - b.position);
+  area.innerHTML = sorted.map((driver, i) => {
+    const color = DRIVER_COLORS[i % DRIVER_COLORS.length];
+    const safeN = driver.driverName.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const isHL  = highlightedDriver === driver.driverName;
+    const spark = buildSparkline(driver, color);
+    return `<div class="compact-driver-row${isHL ? ' highlighted' : ''}" style="--card-color:${color}"
+      onmouseenter="showDriverPopup(this,'${safeN}',${i})"
+      onmouseleave="hideDriverPopup()"
+      onclick="toggleDriverHighlight('${safeN}')">
+      <span class="compact-pos-name" style="color:${color}">P${driver.position} · ${escHtml(driver.driverName)}</span>
+      ${spark}
+    </div>`;
+  }).join('');
 }
 
-function toggleCardCollapse(name) {
-  if (collapsedDrivers.has(name)) collapsedDrivers.delete(name);
-  else collapsedDrivers.add(name);
-  renderStats();
+function showDriverPopup(el, driverName, colorIdx) {
+  if (!currentHeat) return;
+  const driver = currentHeat.results.find(r => r.driverName === driverName);
+  if (!driver) return;
+  const color = DRIVER_COLORS[colorIdx % DRIVER_COLORS.length];
+  const qual  = driver.qualPos != null ? `Q${driver.qualPos}` : '?';
+  const net   = driver.qualPos != null ? driver.qualPos - driver.position : null;
+  const posChange = net != null ? `+${Math.max(0,net)} / -${Math.max(0,-net)}` : '—';
+  const consStr = driver.consistencyPct != null ? driver.consistencyPct.toFixed(1) + '%' : '—';
+  const consColor = driver.consistencyPct != null
+    ? (driver.consistencyPct >= 90 ? '#2ecc71' : driver.consistencyPct >= 75 ? '#f5c842' : '#e53935')
+    : '#55558a';
+  const incColor = driver.incidentCount ? '#e53935' : '#2ecc71';
+
+  const popup = document.getElementById('driver-popup');
+  popup.style.borderColor = color;
+  popup.innerHTML = `
+    <div class="dp-title" style="color:${color}">P${driver.position} · ${escHtml(driver.driverName)}</div>
+    <div class="dp-sparkline">${buildSparkline(driver, color)}</div>
+    <div class="stat-row"><span>Grid → Finish</span><span class="v">${qual} → P${driver.position}</span></div>
+    <div class="stat-row"><span>Best lap</span><span class="v">${msToStr(driver.fastestLapMs)}</span></div>
+    <div class="stat-row"><span>Avg lap</span><span class="v">${msToStr(driver.avgLapMs)}</span></div>
+    <div class="stat-row"><span>Consistency</span><span class="v" style="color:${consColor}">${consStr}</span></div>
+    <div class="stat-row"><span>Incidents</span><span class="v" style="color:${incColor}">${driver.incidentCount} (${driver.laps ?? '?'} laps)</span></div>
+    <div class="stat-row"><span>Pos changes</span><span class="v">${posChange}</span></div>`;
+
+  popup.style.display = 'block';
+  const rect = el.getBoundingClientRect();
+  const ph = popup.offsetHeight;
+  popup.style.right = (window.innerWidth - rect.left + 8) + 'px';
+  popup.style.left  = 'auto';
+  popup.style.top   = Math.max(8, Math.min(rect.top, window.innerHeight - ph - 8)) + 'px';
 }
 
-function toggleCardsCollapsed() {
-  cardsCollapsed = !cardsCollapsed;
-  const btn = document.getElementById('cardsCollapseBtn');
-  btn.textContent = cardsCollapsed ? '▸ Expand' : '▾ Collapse';
-  renderStats();
+function hideDriverPopup() {
+  document.getElementById('driver-popup').style.display = 'none';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2049,8 +2046,9 @@ async function loadEvent() {
     document.getElementById('fastestLapsArea').innerHTML = '';
     document.getElementById('spicyArea').innerHTML       = '';
     document.getElementById('playBtn').disabled          = true;
-    document.getElementById('raceControls').style.display  = 'none';
-    document.getElementById('statsHeader').style.display   = 'none';
+    document.getElementById('raceControls').style.display   = 'none';
+    document.getElementById('statsHeader').style.display    = 'none';
+    document.getElementById('sparklineHint').style.display  = 'none';
     document.getElementById('scrubberWrap').style.display  = 'none';
     document.getElementById('spicyPanel').style.display    = 'none';
     document.getElementById('rh-spicy').style.display      = 'none';
@@ -2134,12 +2132,10 @@ async function loadRaceUrl(url) {
     document.getElementById('raceTime').textContent  = leader.totalTimeMs ? `Race time: ${msToStr(leader.totalTimeMs)}` : '';
     document.getElementById('playBtn').disabled          = false;
     document.getElementById('raceControls').style.display  = 'flex';
-    document.getElementById('statsHeader').style.display   = 'flex';
-    document.getElementById('spicyPanel').style.display    = 'flex';
-    document.getElementById('rh-spicy').style.display      = 'block';
-    // Restore chart view + uncollapsed cards when loading a new race
-    cardsCollapsed = false;
-    document.getElementById('cardsCollapseBtn').textContent = '▾ Collapse';
+    document.getElementById('statsHeader').style.display    = 'block';
+    document.getElementById('sparklineHint').style.display  = 'block';
+    document.getElementById('spicyPanel').style.display     = 'flex';
+    document.getElementById('rh-spicy').style.display       = 'block';
     viewMode = 'chart';
     chartMode = 'position';
     document.getElementById('vizWrap').style.display   = '';
