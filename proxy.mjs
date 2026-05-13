@@ -3,9 +3,22 @@
 // Keep running while using rc-log.html in the browser.
 import http from 'http';
 import https from 'https';
+import fs from 'fs';
 import { URL } from 'url';
 
 const PORT = 3001;
+
+function readEnv() {
+  try {
+    const content = fs.readFileSync(new URL('.env', import.meta.url), 'utf8');
+    const out = {};
+    for (const line of content.split('\n')) {
+      const eq = line.indexOf('=');
+      if (eq > 0) out[line.slice(0, eq).trim()] = line.slice(eq + 1).trim();
+    }
+    return out;
+  } catch { return {}; }
+}
 
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,6 +27,15 @@ const server = http.createServer((req, res) => {
   if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
   if (req.method !== 'GET')     { res.writeHead(405); res.end('GET only'); return; }
 
+  // ── /env — expose .env keys to the local browser ────────────────
+  if (req.url === '/env') {
+    const env = readEnv();
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ GEMINI_KEY: env.GEMINI_KEY || '' }));
+    return;
+  }
+
+  // ── /proxy?url=... — CORS proxy ──────────────────────────────────
   let target;
   try {
     const reqUrl = new URL(req.url, `http://localhost:${PORT}`);

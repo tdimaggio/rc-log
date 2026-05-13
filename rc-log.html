@@ -406,7 +406,7 @@
     <span id="speedVal">5</span>
   </div>
   <span class="sep">|</span>
-  <input type="text" id="apiKeyInput" placeholder="Anthropic API Key" />
+  <input type="text" id="apiKeyInput" placeholder="Gemini API Key" />
 </div>
 
 <!-- ── Main ───────────────────────────────────────────────────── -->
@@ -509,11 +509,11 @@ document.getElementById('speedSlider').addEventListener('input', function () {
   }
 });
 
-// Paste your Anthropic API key into the field above — it is saved in localStorage.
-document.getElementById('apiKeyInput').value = localStorage.getItem('rc_api_key') || '';
+// Gemini API key — loaded from proxy /env, then localStorage, then manual paste
+document.getElementById('apiKeyInput').value = localStorage.getItem('rc_gemini_key') || '';
 document.getElementById('apiKeyInput').addEventListener('blur', () => {
   const v = document.getElementById('apiKeyInput').value.trim();
-  if (v) localStorage.setItem('rc_api_key', v);
+  if (v) localStorage.setItem('rc_gemini_key', v);
 });
 
 function tickInterval() {
@@ -523,7 +523,7 @@ function tickInterval() {
 
 function getApiKey() {
   return document.getElementById('apiKeyInput').value.trim()
-      || localStorage.getItem('rc_api_key')
+      || localStorage.getItem('rc_gemini_key')
       || '';
 }
 
@@ -1015,20 +1015,17 @@ async function generateSpicyAnalysis() {
   try {
     const prompt = `You're a sharp-tongued color commentator for RC car racing. Write 3–4 punchy sentences of race commentary. Call out the winner by name, highlight any drama or incidents, and roast the driver with the most carnage (if applicable). Be entertaining, use racing slang, keep it tight.\n\nRace: ${className}${heatName ? ' ' + heatName : ''}\n\n${summary}`;
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 350,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    });
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 350 },
+        }),
+      }
+    );
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -1036,7 +1033,7 @@ async function generateSpicyAnalysis() {
     }
 
     const data = await res.json();
-    area.innerHTML = escHtml(data.content[0].text).replace(/\n/g, '<br>');
+    area.innerHTML = escHtml(data.candidates[0].content.parts[0].text).replace(/\n/g, '<br>');
   } catch (err) {
     area.innerHTML = `<span class="error-msg">Error: ${escHtml(err.message)}</span>`;
   }
@@ -1627,7 +1624,7 @@ document.addEventListener('keydown', e => {
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  Startup — restore from URL hash, then localStorage
+//  Startup — restore from URL hash, then localStorage, load env key
 // ═══════════════════════════════════════════════════════════════
 readUrlHash();
 if (!document.getElementById('eventUrl').value) {
@@ -1638,6 +1635,19 @@ if (!document.getElementById('raceUrl').value) {
   const saved = localStorage.getItem('rc_last_race_url');
   if (saved) document.getElementById('raceUrl').value = saved;
 }
+
+// Auto-load Gemini key from proxy .env (silently skip if proxy isn't running)
+(async () => {
+  try {
+    const res = await fetch('http://localhost:3001/env', { signal: AbortSignal.timeout(2000) });
+    if (!res.ok) return;
+    const env = await res.json();
+    if (env.GEMINI_KEY) {
+      document.getElementById('apiKeyInput').value = env.GEMINI_KEY;
+      localStorage.setItem('rc_gemini_key', env.GEMINI_KEY);
+    }
+  } catch { /* proxy not running — fall back to localStorage / manual paste */ }
+})();
 </script>
 </body>
 </html>
