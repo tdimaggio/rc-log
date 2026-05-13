@@ -311,10 +311,6 @@
     #scrubberThumb.dragging { opacity: 1; }
     #scrubberThumb.dragging { cursor: grabbing; }
 
-    /* ── Chart mode toggle ──────────────────────────────────────────── */
-    #chartToggleBtn { display: none; }
-    #chartToggleBtn.active { background: #1a2040; border-color: #3040a0; color: #8090e0; }
-
     /* ── Driver highlight ───────────────────────────────────────────── */
     .stat-card { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
     .stat-card.highlighted { border-color: var(--card-color, #e53935); box-shadow: 0 0 0 1px var(--card-color, #e53935); }
@@ -388,6 +384,103 @@
     ::-webkit-scrollbar-track { background: #0d0d14; }
     ::-webkit-scrollbar-thumb { background: #222240; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #2e2e55; }
+
+    /* ── Heatmap incident pulse ─────────────────────────────────── */
+    @keyframes hm-pulse { 0%,100% { opacity:.9; } 50% { opacity:.45; } }
+    .hm-inc { animation: hm-pulse 1.8s ease-in-out infinite; }
+
+    /* ── Chart tabs ─────────────────────────────────────────────── */
+    .chart-tabs { display: flex; gap: 3px; }
+    .chart-tab {
+      background: #1c1c30; border: 1px solid #2c2c50; color: #66669a;
+      padding: 5px 10px; font-size: 12px; font-family: inherit; cursor: pointer;
+      border-radius: 5px; white-space: nowrap; transition: background 0.15s;
+    }
+    .chart-tab:hover { background: #252540; color: #dddde8; }
+    .chart-tab.active { background: #1a2040; border-color: #3040a0; color: #8090e0; }
+
+    /* ── View toggle ─────────────────────────────────────────────── */
+    .view-tabs { display: flex; gap: 3px; margin-bottom: 4px; }
+    .view-tab {
+      background: #1c1c30; border: 1px solid #2c2c50; color: #66669a;
+      padding: 4px 9px; font-size: 11px; font-family: inherit; cursor: pointer;
+      border-radius: 4px; white-space: nowrap; transition: background 0.15s;
+    }
+    .view-tab:hover { background: #252540; color: #dddde8; }
+    .view-tab.active { background: #3c1a20; border-color: #c0392b; color: #e57373; }
+
+    /* ── Table view ──────────────────────────────────────────────── */
+    #tableWrap { flex: 1; overflow: auto; display: none; }
+    .timing-table { border-collapse: collapse; font-size: 11px; white-space: nowrap; }
+    .timing-table th {
+      background: #101018; padding: 4px 8px; color: #44447a; font-weight: 600;
+      position: sticky; top: 0; z-index: 1; border-bottom: 1px solid #1e1e32;
+      text-align: center;
+    }
+    .timing-driver-col {
+      position: sticky; left: 0; z-index: 2; min-width: 130px; padding: 4px 8px;
+      border-right: 1px solid #1e1e32; font-weight: 500; text-align: left;
+      background: #0d0d14;
+    }
+    th.timing-driver-col { z-index: 3; background: #101018; }
+    .timing-table td {
+      padding: 3px 7px; border-bottom: 1px solid #0f0f1a;
+      text-align: center; color: #55558a;
+    }
+    .timing-table tbody tr:hover td { background: #111120; }
+    .timing-fl  { background: #0a2a15 !important; color: #4caf50 !important; font-weight: 600; }
+    .timing-pb  { background: #2a2800 !important; color: #f5c842 !important; }
+    .timing-inc { background: #1a0808 !important; color: #e53935 !important; }
+    .timing-cur { box-shadow: inset 2px 0 0 #5050a0, inset -2px 0 0 #5050a0; }
+
+    /* ── Collapsible stat cards ──────────────────────────────────── */
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
+    .card-collapse-btn {
+      background: none; border: none; color: #44447a; font-size: 11px;
+      cursor: pointer; padding: 0 0 0 6px; line-height: 1; flex-shrink: 0; margin-top: 1px;
+    }
+    .card-collapse-btn:hover { color: #8888b0; }
+
+    /* ── Sparkline ───────────────────────────────────────────────── */
+    .sparkline { display: block; margin-top: 3px; }
+
+    /* ── Compact driver rows (cards collapsed) ───────────────────── */
+    .compact-driver-row {
+      display: flex; align-items: center; gap: 8px; padding: 4px 6px;
+      border-radius: 6px; cursor: pointer; transition: background 0.1s;
+    }
+    .compact-driver-row:hover { background: #1a1a2e; }
+    .compact-pos-name { font-size: 12px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+
+    /* ── Fastest Laps Board ──────────────────────────────────────── */
+    #fastestLapsArea { padding-top: 4px; }
+    .fl-section-title {
+      font-size: 10px; font-weight: 600; color: #44447a;
+      text-transform: uppercase; letter-spacing: 1.5px; padding: 0 2px 8px;
+    }
+    .fl-row { margin-bottom: 8px; }
+    .fl-row-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+    .fl-name { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+    .fl-time { font-size: 11px; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+    .fl-bar-track { height: 4px; background: #1a1a2e; border-radius: 2px; }
+    .fl-bar-fill  { height: 100%; border-radius: 2px; transition: width 0.15s; }
+
+    /* ── Event summary grid ──────────────────────────────────────── */
+    .event-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px; padding: 4px;
+    }
+    .event-heat-card {
+      background: #0a0a12; border: 1px solid #1e1e32; border-radius: 9px;
+      padding: 12px; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    }
+    .event-heat-card:hover { background: #12122a; border-color: #3535a0; }
+    .ehc-name { font-size: 12px; font-weight: 600; color: #c0c0d8; margin-bottom: 6px; line-height: 1.3; }
+    .ehc-badge {
+      display: inline-block; background: #1a1a2e; border-radius: 4px;
+      padding: 2px 6px; font-size: 10px; color: #44447a; margin-right: 4px;
+    }
   </style>
 </head>
 <body>
@@ -431,7 +524,19 @@
         <div id="raceTitle">—</div>
         <div id="raceSub">Load an event or single race above</div>
       </div>
-      <button class="btn" id="chartToggleBtn" onclick="toggleChartMode()">Lap Times</button>
+      <div id="raceControls" style="display:none;flex-direction:column;gap:3px;align-items:center">
+        <div id="viewToggle" class="view-tabs">
+          <button class="view-tab active" onclick="setViewMode('chart')">Chart</button>
+          <button class="view-tab" onclick="setViewMode('table')">Table</button>
+        </div>
+        <div id="chartTabs" class="chart-tabs">
+          <button class="chart-tab active" onclick="setChartMode('position')">Position</button>
+          <button class="chart-tab" onclick="setChartMode('laptime')">Lap Times</button>
+          <button class="chart-tab" onclick="setChartMode('gap')">Gap</button>
+          <button class="chart-tab" onclick="setChartMode('pace')">Pace</button>
+          <button class="chart-tab" onclick="setChartMode('heatmap')">Heat Map</button>
+        </div>
+      </div>
       <div style="text-align:right">
         <div id="lapCounter">—</div>
         <div id="raceTime"></div>
@@ -452,6 +557,7 @@
         </div>
       </div>
     </div>
+    <div id="tableWrap"></div>
     <div class="resize-handle-h" id="rh-spicy" style="display:none"></div>
     <div id="spicyPanel">
       <div id="spicyPanelHeader">
@@ -468,7 +574,12 @@
 
   <!-- Right sidebar -->
   <div id="sidebar-right" style="width:225px">
+    <div id="statsHeader" style="display:none;justify-content:space-between;align-items:center;padding:4px 2px 8px">
+      <span style="font-size:10px;font-weight:600;color:#44447a;text-transform:uppercase;letter-spacing:1.5px">Drivers</span>
+      <button id="cardsCollapseBtn" class="btn" style="font-size:10px;padding:2px 8px;line-height:1.4" onclick="toggleCardsCollapsed()">▾ Collapse</button>
+    </div>
     <div id="statsArea"></div>
+    <div id="fastestLapsArea"></div>
   </div>
 
 </div>
@@ -496,7 +607,10 @@ let maxLeaderLap      = 0;
 let playTimer         = null;
 let isPlaying         = false;
 let highlightedDriver = null;   // driver name string, or null
-let chartMode         = 'position';  // 'position' | 'laptime'
+let chartMode         = 'position';  // 'position' | 'laptime' | 'gap' | 'pace'
+let viewMode          = 'chart';     // 'chart' | 'table'
+let cardsCollapsed    = false;
+const collapsedDrivers = new Set();
 
 // ═══════════════════════════════════════════════════════════════
 //  UI Helpers
@@ -658,9 +772,13 @@ function parseRacePage(html) {
     const avgF = parseStatFloat(cells[6]?.textContent || '');
     const avgLapMs = avgF ? Math.round(avgF * 1000) : null;
 
+    // Consistency: col 12, expressed as a % string like "87.5" or "87.5%"
+    const rawCons = (cells[12]?.textContent || '').trim().replace('%', '');
+    const consistencyPct = parseFloat(rawCons) || null;
+
     results.push({
       position: pos, driverName: rawDriver,
-      qualPos, laps, totalTimeMs, fastestLapMs, avgLapMs,
+      qualPos, laps, totalTimeMs, fastestLapMs, avgLapMs, consistencyPct,
       lapTimes: [], lapMeta: [],
       incidentCount: 0, incidentRate: 0, topAvgMs: null,
     });
@@ -796,10 +914,37 @@ function computePositionsByLap(results) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  Shared race data helper  — cumulative times + gap to leader
+// ═══════════════════════════════════════════════════════════════
+function computeRaceData(results, maxLap) {
+  const driverCumAt = {};
+  for (const r of results) {
+    driverCumAt[r.driverName] = [null];
+    for (let l = 1; l <= r.lapTimes.length; l++) {
+      driverCumAt[r.driverName][l] = r.lapTimes.slice(0, l).reduce((a, b) => a + b, 0);
+    }
+  }
+  const gapAt = {};
+  for (const r of results) gapAt[r.driverName] = new Array(maxLap + 1).fill(null);
+  for (let lap = 1; lap <= maxLap; lap++) {
+    const completed = results.filter(r => driverCumAt[r.driverName][lap] != null);
+    if (!completed.length) continue;
+    const minCum = Math.min(...completed.map(r => driverCumAt[r.driverName][lap]));
+    for (const r of completed) {
+      gapAt[r.driverName][lap] = driverCumAt[r.driverName][lap] - minCum;
+    }
+  }
+  return { driverCumAt, gapAt };
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  Position-graph Visualization  (lap-by-lap position chart)
 // ═══════════════════════════════════════════════════════════════
 function renderVisualization() {
-  if (chartMode === 'laptime') { renderLapTimeChart(); return; }
+  if (chartMode === 'laptime') { renderLapTimeChart();  return; }
+  if (chartMode === 'gap')     { renderGapChart();      return; }
+  if (chartMode === 'pace')    { renderPaceChart();     return; }
+  if (chartMode === 'heatmap') { renderHeatmapChart();  return; }
   const container = document.getElementById('vizArea');
 
   if (!currentHeat || !currentHeat.results.length) {
@@ -854,23 +999,7 @@ function renderVisualization() {
   const showThru = Math.min(leaderLap, maxLap); // draw up to this lap
 
   // ── Pre-compute cumulative times and gap-to-leader at each lap ──
-  const driverCumAt = {};
-  for (const r of results) {
-    driverCumAt[r.driverName] = [null]; // lap 0 = grid start, no time
-    for (let l = 1; l <= r.lapTimes.length; l++) {
-      driverCumAt[r.driverName][l] = r.lapTimes.slice(0, l).reduce((a, b) => a + b, 0);
-    }
-  }
-  const gapAt = {};
-  for (const r of results) gapAt[r.driverName] = new Array(maxLap + 1).fill(null);
-  for (let lap = 1; lap <= maxLap; lap++) {
-    const completed = results.filter(r => driverCumAt[r.driverName][lap] != null);
-    if (!completed.length) continue;
-    const minCum = Math.min(...completed.map(r => driverCumAt[r.driverName][lap]));
-    for (const r of completed) {
-      gapAt[r.driverName][lap] = driverCumAt[r.driverName][lap] - minCum;
-    }
-  }
+  const { driverCumAt, gapAt } = computeRaceData(results, maxLap);
 
   results.forEach(driver => {
     const color = colorOf[driver.driverName];
@@ -960,6 +1089,31 @@ function escHtml(s) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  Sparkline builder
+// ═══════════════════════════════════════════════════════════════
+function buildSparkline(driver, color) {
+  const laps = driver.lapTimes;
+  if (!laps.length) return '';
+  const valid = laps.filter(t => t >= FLOOR_FILTER_MS);
+  if (!valid.length) return '';
+  const minT = Math.min(...valid), maxT = Math.max(...valid);
+  const W = 80, H = 22, n = laps.length;
+  const xAt = i => (n <= 1 ? W / 2 : (i / (n - 1)) * W);
+  const yAt = t  => maxT === minT ? H / 2 : H - ((t - minT) / (maxT - minT)) * H;
+  const pts = [], dots = [];
+  laps.forEach((t, i) => {
+    if (t < FLOOR_FILTER_MS) return;
+    pts.push(`${xAt(i).toFixed(1)},${yAt(t).toFixed(1)}`);
+    if (driver.lapMeta?.[i]?.type === 'incident') {
+      dots.push(`<circle cx="${xAt(i).toFixed(1)}" cy="${yAt(t).toFixed(1)}" r="2" fill="#e53935"/>`);
+    }
+  });
+  return `<svg class="sparkline" width="80" height="22" viewBox="0 0 80 22">${
+    pts.length >= 2 ? `<polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>` : ''
+  }${dots.join('')}</svg>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  Stats sidebar
 // ═══════════════════════════════════════════════════════════════
 function renderStats() {
@@ -969,26 +1123,126 @@ function renderStats() {
   const { results, className, heatName } = currentHeat;
   const sorted = [...results].sort((a, b) => a.position - b.position);
 
+  // ── Collapsed: compact rows ─────────────────────────────────
+  if (cardsCollapsed) {
+    area.innerHTML = sorted.map((driver, i) => {
+      const color  = DRIVER_COLORS[i % DRIVER_COLORS.length];
+      const safeN  = escHtml(driver.driverName).replace(/'/g, "\\'");
+      const isHL   = highlightedDriver === driver.driverName;
+      const spark  = buildSparkline(driver, color);
+      return `<div class="compact-driver-row${isHL ? ' highlighted' : ''}" style="--card-color:${color}" onclick="toggleDriverHighlight('${safeN}')">
+        <span class="compact-pos-name" style="color:${color}">P${driver.position} · ${escHtml(driver.driverName)}</span>
+        ${spark}
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  // ── Expanded: full cards ────────────────────────────────────
   function card(driver, driverColor) {
     const qual = driver.qualPos != null ? `Q${driver.qualPos}` : '?';
     const net  = driver.qualPos != null ? driver.qualPos - driver.position : null;
-    const posChange = net != null
-      ? `+${Math.max(0, net)} / -${Math.max(0, -net)}`
-      : '—';
+    const posChange = net != null ? `+${Math.max(0, net)} / -${Math.max(0, -net)}` : '—';
     const isHL = highlightedDriver === driver.driverName;
+    const isCollapsed = collapsedDrivers.has(driver.driverName);
+    const safeN = escHtml(driver.driverName).replace(/'/g, "\\'");
+    const sparkline = buildSparkline(driver, driverColor);
+    const consStr = driver.consistencyPct != null ? driver.consistencyPct.toFixed(1) + '%' : '—';
+    const consColor = driver.consistencyPct != null
+      ? (driver.consistencyPct >= 90 ? '#2ecc71' : driver.consistencyPct >= 75 ? '#f5c842' : '#e53935')
+      : '#55558a';
     return `
-      <div class="stat-card${isHL ? ' highlighted' : ''}" style="--card-color:${driverColor}" onclick="toggleDriverHighlight('${escHtml(driver.driverName).replace(/'/g, "\\'")}')">
-        <div class="card-title" style="color:${driverColor}">P${driver.position} · ${escHtml(driver.driverName)}</div>
-        <div class="card-sub">${escHtml(className)}${heatName ? ' · ' + escHtml(heatName) : ''}</div>
-        <div class="stat-row"><span>Grid → Finish</span><span class="v">${qual} → P${driver.position}</span></div>
-        <div class="stat-row"><span>Best lap</span><span class="v">${msToStr(driver.fastestLapMs)}</span></div>
-        <div class="stat-row"><span>Avg lap</span><span class="v">${msToStr(driver.avgLapMs)}</span></div>
-        <div class="stat-row"><span>Incidents</span><span class="v" style="color:${driver.incidentCount ? incidentFill(1500) : '#2ecc71'}">${driver.incidentCount} (${driver.laps ?? '?'} laps)</span></div>
-        <div class="stat-row"><span>Pos changes</span><span class="v">${posChange}</span></div>
+      <div class="stat-card${isHL ? ' highlighted' : ''}" style="--card-color:${driverColor}">
+        <div class="card-header">
+          <div onclick="toggleDriverHighlight('${safeN}')" style="cursor:pointer;flex:1;min-width:0">
+            <div class="card-title" style="color:${driverColor}">P${driver.position} · ${escHtml(driver.driverName)}</div>
+            ${sparkline}
+          </div>
+          <button class="card-collapse-btn" onclick="toggleCardCollapse('${safeN}')" title="Collapse/expand">${isCollapsed ? '▸' : '▾'}</button>
+        </div>
+        ${isCollapsed ? '' : `<div class="card-body">
+          <div class="card-sub" style="margin-bottom:8px">${escHtml(className)}${heatName ? ' · ' + escHtml(heatName) : ''}</div>
+          <div class="stat-row"><span>Grid → Finish</span><span class="v">${qual} → P${driver.position}</span></div>
+          <div class="stat-row"><span>Best lap</span><span class="v">${msToStr(driver.fastestLapMs)}</span></div>
+          <div class="stat-row"><span>Avg lap</span><span class="v">${msToStr(driver.avgLapMs)}</span></div>
+          <div class="stat-row"><span>Consistency</span><span class="v" style="color:${consColor}">${consStr}</span></div>
+          <div class="stat-row"><span>Incidents</span><span class="v" style="color:${driver.incidentCount ? incidentFill(1500) : '#2ecc71'}">${driver.incidentCount} (${driver.laps ?? '?'} laps)</span></div>
+          <div class="stat-row"><span>Pos changes</span><span class="v">${posChange}</span></div>
+        </div>`}
       </div>`;
   }
 
   area.innerHTML = sorted.map((d, i) => card(d, DRIVER_COLORS[i % DRIVER_COLORS.length])).join('');
+}
+
+function toggleCardCollapse(name) {
+  if (collapsedDrivers.has(name)) collapsedDrivers.delete(name);
+  else collapsedDrivers.add(name);
+  renderStats();
+}
+
+function toggleCardsCollapsed() {
+  cardsCollapsed = !cardsCollapsed;
+  const btn = document.getElementById('cardsCollapseBtn');
+  btn.textContent = cardsCollapsed ? '▸ Expand' : '▾ Collapse';
+  renderStats();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Consistency Board
+// ═══════════════════════════════════════════════════════════════
+function renderConsistency() {
+  const area = document.getElementById('fastestLapsArea');
+  if (!currentHeat) { area.innerHTML = ''; return; }
+
+  const results = currentHeat.results;
+  const sorted  = [...results].sort((a, b) => a.position - b.position);
+  const colorOf = {};
+  sorted.forEach((r, i) => { colorOf[r.driverName] = DRIVER_COLORS[i % DRIVER_COLORS.length]; });
+
+  // Use liverc's consistencyPct if available; otherwise compute from clean lap std dev
+  const withCons = results.map(r => {
+    let pct = r.consistencyPct;
+    if (pct == null && r.topAvgMs != null) {
+      // Fallback: coefficient of variation → consistency %
+      const cleanLaps = r.lapTimes.filter((t, i) => r.lapMeta?.[i]?.type === 'clean');
+      if (cleanLaps.length >= 3) {
+        const mean = cleanLaps.reduce((a, b) => a + b, 0) / cleanLaps.length;
+        const variance = cleanLaps.reduce((s, t) => s + (t - mean) ** 2, 0) / cleanLaps.length;
+        const cv = Math.sqrt(variance) / mean;
+        pct = Math.max(0, Math.min(100, (1 - cv * 5) * 100));
+      }
+    }
+    return { ...r, displayPct: pct };
+  }).sort((a, b) => (b.displayPct ?? -1) - (a.displayPct ?? -1));
+
+  const maxPct = Math.max(...withCons.map(d => d.displayPct ?? 0), 1);
+  const hasAnyData = withCons.some(d => d.displayPct != null);
+
+  let html = `<div style="border-top:1px solid #1e1e32;margin-top:10px;padding-top:10px">
+    <div class="fl-section-title">Consistency ${hasAnyData ? '' : '<span style="color:#36365e;font-size:9px;font-weight:400">(no data)</span>'}</div>`;
+
+  for (const d of withCons) {
+    const color = colorOf[d.driverName];
+    const pct   = d.displayPct;
+    const barW  = pct != null ? (pct / 100 * 100).toFixed(1) : 0;
+    const consColor = pct != null
+      ? (pct >= 90 ? '#2ecc71' : pct >= 75 ? '#f5c842' : '#e53935')
+      : '#36365e';
+    const label = d.driverName.length > 14 ? d.driverName.slice(0, 13) + '…' : d.driverName;
+    html += `<div class="fl-row">
+      <div class="fl-row-header">
+        <span class="fl-name" style="color:${color}">${escHtml(label)}</span>
+        <span class="fl-time" style="color:${consColor}">${pct != null ? pct.toFixed(1) + '%' : '—'}</span>
+      </div>
+      <div class="fl-bar-track">
+        <div class="fl-bar-fill" style="width:${barW}%;background:${consColor}"></div>
+      </div>
+    </div>`;
+  }
+
+  html += '</div>';
+  area.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1089,7 +1343,7 @@ function tickAnimation() {
   if (leaderLap < maxLeaderLap) {
     leaderLap++;
     updateHeader();
-    renderVisualization();
+    if (viewMode === 'table') renderTable(); else renderVisualization();
     updateScrubber();
   } else {
     clearInterval(playTimer);
@@ -1110,7 +1364,7 @@ function scrubToLap(lap) {
   if (!currentHeat) return;
   leaderLap = Math.max(0, Math.min(lap, maxLeaderLap));
   updateHeader();
-  renderVisualization();
+  if (viewMode === 'table') renderTable(); else renderVisualization();
   updateScrubber();
 }
 
@@ -1124,13 +1378,26 @@ function updateScrubber() {
   document.getElementById('scrubberThumb').style.left = pct + '%';
 }
 
-// ── Chart mode toggle ────────────────────────────────────────────
-function toggleChartMode() {
-  chartMode = chartMode === 'position' ? 'laptime' : 'position';
-  const btn = document.getElementById('chartToggleBtn');
-  btn.textContent = chartMode === 'position' ? 'Lap Times' : 'Positions';
-  btn.classList.toggle('active', chartMode === 'laptime');
+// ── Chart mode ───────────────────────────────────────────────────
+function setChartMode(mode) {
+  chartMode = mode;
+  document.querySelectorAll('.chart-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${mode}'`));
+  });
   renderVisualization();
+}
+
+// ── View mode ────────────────────────────────────────────────────
+function setViewMode(mode) {
+  viewMode = mode;
+  document.querySelectorAll('.view-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${mode}'`));
+  });
+  const isChart = mode === 'chart';
+  document.getElementById('vizWrap').style.display   = isChart ? '' : 'none';
+  document.getElementById('tableWrap').style.display = isChart ? 'none' : 'block';
+  document.getElementById('chartTabs').style.display = isChart ? '' : 'none';
+  if (isChart) renderVisualization(); else renderTable();
 }
 
 // ── Driver highlight ─────────────────────────────────────────────
@@ -1284,6 +1551,440 @@ function renderLapTimeChart() {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  Gap Chart  (gap to leader over laps)
+// ═══════════════════════════════════════════════════════════════
+function renderGapChart() {
+  const container = document.getElementById('vizArea');
+  if (!currentHeat || !currentHeat.results.length) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📊</div><div>Select a race from the left panel</div></div>`;
+    return;
+  }
+  const results = currentHeat.results;
+  const { posMap, maxLap } = currentHeat._posMap;
+  const { gapAt } = computeRaceData(results, maxLap);
+
+  let maxGapMs = 0;
+  for (const r of results) {
+    for (let l = 1; l <= maxLap; l++) {
+      const g = gapAt[r.driverName][l];
+      if (g != null && g > maxGapMs) maxGapMs = g;
+    }
+  }
+  if (maxGapMs < 1000) maxGapMs = 1000;
+
+  const W      = Math.max(400, container.getBoundingClientRect().width || 700);
+  const trackW = W - VIZ_ML - VIZ_MR;
+  const trackH = Math.max(220, Math.min(320, Math.floor((window.innerHeight - 200) * 0.45)));
+  const H      = trackH + VIZ_MT + VIZ_MB;
+  const showThru = Math.min(leaderLap, maxLap);
+
+  const xAt = lap => VIZ_ML + ((lap - 1) / Math.max(maxLap - 1, 1)) * trackW;
+  const yAt = ms  => VIZ_MT + (ms / maxGapMs) * trackH;
+
+  const sorted = [...results].sort((a, b) => a.position - b.position);
+  const colorOf = {};
+  sorted.forEach((r, i) => { colorOf[r.driverName] = DRIVER_COLORS[i % DRIVER_COLORS.length]; });
+
+  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">`];
+
+  // Y-axis (gap in seconds)
+  const gapStepMs = Math.max(1000, Math.ceil((maxGapMs / 1000) / 5) * 1000);
+  for (let g = 0; g <= maxGapMs; g += gapStepMs) {
+    const y = yAt(g);
+    parts.push(`<line x1="${VIZ_ML}" y1="${y.toFixed(1)}" x2="${VIZ_ML + trackW}" y2="${y.toFixed(1)}" stroke="#1a1a2e" stroke-width="1"/>`);
+    const label = g === 0 ? 'Leader' : `+${(g / 1000).toFixed(0)}s`;
+    parts.push(`<text x="${VIZ_ML - 6}" y="${(y + 4).toFixed(1)}" fill="#44447a" font-size="11" text-anchor="end" font-family="Inter,system-ui,sans-serif">${label}</text>`);
+  }
+
+  // X-axis
+  const lapStep = maxLap <= 15 ? 2 : maxLap <= 35 ? 5 : 10;
+  const tickLaps = new Set([1, maxLap]);
+  for (let l = lapStep; l < maxLap; l += lapStep) tickLaps.add(l);
+  for (const l of [...tickLaps].sort((a, b) => a - b)) {
+    const x = xAt(l);
+    parts.push(`<line x1="${x.toFixed(1)}" y1="${VIZ_MT}" x2="${x.toFixed(1)}" y2="${VIZ_MT + trackH}" stroke="#1a1a2e" stroke-dasharray="2,4" stroke-width="1"/>`);
+    parts.push(`<text x="${x.toFixed(1)}" y="${VIZ_MT + trackH + 16}" fill="#44447a" font-size="11" text-anchor="middle" font-family="Inter,system-ui,sans-serif">${l}</text>`);
+  }
+  parts.push(`<text x="${VIZ_ML + trackW / 2}" y="${H - 2}" fill="#32325a" font-size="10" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="500">Laps</text>`);
+
+  // Driver lines + dots
+  results.forEach(driver => {
+    const color = colorOf[driver.driverName];
+    const gaps  = gapAt[driver.driverName];
+    const pts   = [];
+    for (let l = 1; l <= Math.min(showThru, maxLap); l++) {
+      if (gaps[l] != null) pts.push(`${xAt(l).toFixed(1)},${yAt(gaps[l]).toFixed(1)}`);
+    }
+    if (pts.length >= 2) {
+      parts.push(`<polyline data-drivername="${escHtml(driver.driverName)}" points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>`);
+    }
+    for (let l = 1; l <= Math.min(showThru, maxLap); l++) {
+      if (gaps[l] == null) continue;
+      const x = xAt(l), y = yAt(gaps[l]);
+      const curPos = posMap[driver.driverName]?.[l] ?? driver.position;
+      const da = `data-lap="${l}" data-driver="${escHtml(driver.driverName)}" data-pos="${curPos}" data-laptime="${driver.lapTimes[l - 1] ?? 'null'}" data-gap="${gaps[l]}" data-delta="null" data-color="${color}" data-incident="0" data-fl="0"`;
+      parts.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="${color}" opacity="0.9"/>`);
+      parts.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="9" fill="transparent" stroke="none" ${da}/>`);
+    }
+    // Label at end
+    for (let l = Math.min(showThru, maxLap); l >= 1; l--) {
+      if (gaps[l] != null) {
+        const ex = xAt(l), ey = yAt(gaps[l]);
+        const label = driver.driverName.length > 15 ? driver.driverName.slice(0, 14) + '…' : driver.driverName;
+        parts.push(`<rect x="${(ex + 7).toFixed(1)}" y="${(ey - 7).toFixed(1)}" width="8" height="8" fill="${color}" rx="2"/>`);
+        parts.push(`<text x="${(ex + 18).toFixed(1)}" y="${(ey + 3).toFixed(1)}" fill="${color}" font-size="12" font-family="Inter,system-ui,sans-serif" font-weight="600">${escHtml(label)}</text>`);
+        break;
+      }
+    }
+  });
+
+  parts.push('</svg>');
+  container.className = '';
+  container.innerHTML = parts.join('');
+  applyHighlight();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Pace Chart  (3-lap rolling average)
+// ═══════════════════════════════════════════════════════════════
+function renderPaceChart() {
+  const container = document.getElementById('vizArea');
+  if (!currentHeat || !currentHeat.results.length) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📊</div><div>Select a race from the left panel</div></div>`;
+    return;
+  }
+  const WINDOW  = 3;
+  const results = currentHeat.results;
+  const maxLap  = Math.max(...results.map(r => r.lapTimes.length));
+
+  // 3-lap rolling average, skipping incidents
+  const rollingOf = {};
+  for (const r of results) {
+    rollingOf[r.driverName] = new Array(maxLap + 1).fill(null);
+    for (let l = WINDOW; l <= r.lapTimes.length; l++) {
+      const slice = r.lapTimes.slice(l - WINDOW, l);
+      const clean = slice.filter((t, i) => {
+        const meta = r.lapMeta?.[l - WINDOW + i];
+        return meta?.type !== 'incident' && t >= FLOOR_FILTER_MS;
+      });
+      if (clean.length >= 2) {
+        rollingOf[r.driverName][l] = clean.reduce((a, b) => a + b, 0) / clean.length;
+      }
+    }
+  }
+
+  const allVals = [];
+  for (const r of results) {
+    for (let l = 1; l <= maxLap; l++) {
+      const v = rollingOf[r.driverName][l];
+      if (v != null) allVals.push(v);
+    }
+  }
+  if (!allVals.length) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📊</div><div>Not enough lap data for pace chart</div></div>`;
+    return;
+  }
+
+  const minMs  = Math.min(...allVals) * 0.97;
+  const maxMs  = Math.max(...allVals) * 1.03;
+  const W      = Math.max(400, container.getBoundingClientRect().width || 700);
+  const trackW = W - VIZ_ML - VIZ_MR;
+  const trackH = Math.max(220, Math.min(320, Math.floor((window.innerHeight - 200) * 0.45)));
+  const H      = trackH + VIZ_MT + VIZ_MB;
+  const showThru = Math.min(leaderLap, maxLap);
+
+  const xAt = lap => VIZ_ML + ((lap - 1) / Math.max(maxLap - 1, 1)) * trackW;
+  const yAt = ms  => VIZ_MT + ((ms - minMs) / (maxMs - minMs)) * trackH;
+
+  const sorted = [...results].sort((a, b) => a.position - b.position);
+  const colorOf = {};
+  sorted.forEach((r, i) => { colorOf[r.driverName] = DRIVER_COLORS[i % DRIVER_COLORS.length]; });
+
+  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">`];
+
+  // Y-axis
+  const step = Math.ceil((maxMs - minMs) / 5 / 500) * 500 || 1000;
+  for (let t = Math.ceil(minMs / step) * step; t <= maxMs; t += step) {
+    const y = yAt(t);
+    parts.push(`<line x1="${VIZ_ML}" y1="${y.toFixed(1)}" x2="${VIZ_ML + trackW}" y2="${y.toFixed(1)}" stroke="#1a1a2e" stroke-width="1"/>`);
+    parts.push(`<text x="${VIZ_ML - 6}" y="${(y + 4).toFixed(1)}" fill="#44447a" font-size="11" text-anchor="end" font-family="Inter,system-ui,sans-serif">${msToStr(t)}</text>`);
+  }
+
+  // X-axis
+  const lapStep = maxLap <= 15 ? 2 : maxLap <= 35 ? 5 : 10;
+  const tickLaps = new Set([WINDOW, maxLap]);
+  for (let l = lapStep; l < maxLap; l += lapStep) tickLaps.add(l);
+  for (const l of [...tickLaps].sort((a, b) => a - b)) {
+    const x = xAt(l);
+    parts.push(`<line x1="${x.toFixed(1)}" y1="${VIZ_MT}" x2="${x.toFixed(1)}" y2="${VIZ_MT + trackH}" stroke="#1a1a2e" stroke-dasharray="2,4" stroke-width="1"/>`);
+    parts.push(`<text x="${x.toFixed(1)}" y="${VIZ_MT + trackH + 16}" fill="#44447a" font-size="11" text-anchor="middle" font-family="Inter,system-ui,sans-serif">${l}</text>`);
+  }
+  parts.push(`<text x="${VIZ_ML + trackW / 2}" y="${H - 2}" fill="#32325a" font-size="10" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="500">Laps (3-lap rolling avg)</text>`);
+
+  // Driver lines
+  results.forEach(driver => {
+    const color   = colorOf[driver.driverName];
+    const rolling = rollingOf[driver.driverName];
+    const pts = [];
+    for (let l = 1; l <= Math.min(showThru, maxLap); l++) {
+      if (rolling[l] != null) pts.push(`${xAt(l).toFixed(1)},${yAt(rolling[l]).toFixed(1)}`);
+    }
+    if (pts.length >= 2) {
+      parts.push(`<polyline data-drivername="${escHtml(driver.driverName)}" points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>`);
+    }
+    // Label at last valid rolling point
+    for (let l = Math.min(showThru, maxLap); l >= WINDOW; l--) {
+      if (rolling[l] != null) {
+        const ex = xAt(l), ey = yAt(rolling[l]);
+        const label = driver.driverName.length > 15 ? driver.driverName.slice(0, 14) + '…' : driver.driverName;
+        parts.push(`<rect x="${(ex + 7).toFixed(1)}" y="${(ey - 7).toFixed(1)}" width="8" height="8" fill="${color}" rx="2"/>`);
+        parts.push(`<text x="${(ex + 18).toFixed(1)}" y="${(ey + 3).toFixed(1)}" fill="${color}" font-size="12" font-family="Inter,system-ui,sans-serif" font-weight="600">${escHtml(label)}</text>`);
+        break;
+      }
+    }
+  });
+
+  parts.push('</svg>');
+  container.className = '';
+  container.innerHTML = parts.join('');
+  applyHighlight();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Live Timing Table
+// ═══════════════════════════════════════════════════════════════
+function renderTable() {
+  const wrap = document.getElementById('tableWrap');
+  if (!currentHeat || !currentHeat.results.length) {
+    wrap.innerHTML = `<div class="empty-state"><div class="icon">📋</div><div>Select a race from the left panel</div></div>`;
+    return;
+  }
+  const results  = currentHeat.results;
+  const maxLap   = Math.max(...results.map(r => r.lapTimes.length));
+  const showThru = Math.min(leaderLap, maxLap);
+  const { posMap } = currentHeat._posMap;
+
+  // Fastest lap of the race
+  let overallFastestMs = Infinity;
+  for (const r of results) {
+    if (r.fastestLapMs && r.fastestLapMs < overallFastestMs) overallFastestMs = r.fastestLapMs;
+  }
+
+  // Sort drivers by current position
+  const sorted = [...results].sort((a, b) => {
+    const pa = posMap[a.driverName]?.[showThru] ?? 99;
+    const pb = posMap[b.driverName]?.[showThru] ?? 99;
+    return pa - pb;
+  });
+  const colorOf = {};
+  [...results].sort((a, b) => a.position - b.position)
+    .forEach((r, i) => { colorOf[r.driverName] = DRIVER_COLORS[i % DRIVER_COLORS.length]; });
+
+  let html = `<div style="overflow:auto;height:100%;padding:14px 18px"><table class="timing-table"><thead><tr>`;
+  html += `<th class="timing-driver-col">Driver</th>`;
+  for (let l = 1; l <= showThru; l++) {
+    html += `<th class="${l === showThru ? 'timing-cur' : ''}">${l}</th>`;
+  }
+  html += `</tr></thead><tbody>`;
+
+  for (const driver of sorted) {
+    const curPos = posMap[driver.driverName]?.[showThru] ?? driver.position;
+    const color  = colorOf[driver.driverName];
+    const cons   = getDriverConsistency(driver);
+    const consTag = cons != null
+      ? ` <span style="font-size:9px;color:${cons >= 90 ? '#2ecc71' : cons >= 75 ? '#f5c842' : '#e53935'};font-weight:600">${cons >= 92 ? '🎯' : cons < 65 ? '🌪️' : ''}${cons.toFixed(0)}%</span>`
+      : '';
+    html += `<tr><td class="timing-driver-col" style="color:${color}">P${curPos} ${escHtml(driver.driverName)}${consTag}</td>`;
+    for (let l = 1; l <= showThru; l++) {
+      const t = driver.lapTimes[l - 1];
+      if (t == null) { html += `<td class="${l === showThru ? 'timing-cur' : ''}">—</td>`; continue; }
+      const meta = driver.lapMeta?.[l - 1] ?? { type: 'clean', delta: 0 };
+      const isFl   = t === overallFastestMs && driver.fastestLapMs === overallFastestMs && isFinite(overallFastestMs);
+      const isPb   = !isFl && t === driver.fastestLapMs;
+      const isInc  = meta.type === 'incident';
+      const isCur  = l === showThru;
+      let cls = '';
+      if (isFl)      cls = 'timing-fl';
+      else if (isPb) cls = 'timing-pb';
+      else if (isInc) cls = 'timing-inc';
+      if (isCur) cls += (cls ? ' ' : '') + 'timing-cur';
+      html += `<td${cls ? ` class="${cls}"` : ''}>${msToStr(t)}</td>`;
+    }
+    html += `</tr>`;
+  }
+  html += `</tbody></table></div>`;
+  wrap.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Consistency helper  (used by table + heatmap)
+// ═══════════════════════════════════════════════════════════════
+function getDriverConsistency(driver) {
+  if (driver.consistencyPct != null) return driver.consistencyPct;
+  if (driver.topAvgMs == null) return null;
+  const clean = driver.lapTimes.filter((t, i) => driver.lapMeta?.[i]?.type === 'clean');
+  if (clean.length < 3) return null;
+  const mean = clean.reduce((a, b) => a + b, 0) / clean.length;
+  const variance = clean.reduce((s, t) => s + (t - mean) ** 2, 0) / clean.length;
+  const cv = Math.sqrt(variance) / mean;
+  return Math.max(0, Math.min(100, (1 - cv * 5) * 100));
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Consistency Heat Map  (lap quality grid)
+// ═══════════════════════════════════════════════════════════════
+function renderHeatmapChart() {
+  const container = document.getElementById('vizArea');
+  if (!currentHeat || !currentHeat.results.length) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">🏁</div><div>Select a race from the left panel</div></div>`;
+    return;
+  }
+
+  const results  = currentHeat.results;
+  const maxLap   = Math.max(...results.map(r => r.lapTimes.length));
+  const showThru = Math.min(leaderLap, maxLap);
+  const sorted   = [...results].sort((a, b) => a.position - b.position);
+  const n        = sorted.length;
+  const { posMap } = currentHeat._posMap;
+
+  const colorOf = {};
+  sorted.forEach((r, i) => { colorOf[r.driverName] = DRIVER_COLORS[i % DRIVER_COLORS.length]; });
+
+  // Race fastest lap
+  let raceFLMs = Infinity, raceFLDriver = null;
+  for (const r of results) {
+    if (r.fastestLapMs && r.fastestLapMs < raceFLMs) { raceFLMs = r.fastestLapMs; raceFLDriver = r.driverName; }
+  }
+
+  const W       = Math.max(400, container.getBoundingClientRect().width || 700);
+  const LABEL_W = 100;
+  const PAD_R   = 12;
+  const PAD_T   = 24;  // lap number labels
+  const PAD_B   = 34;  // legend
+  const ROW_H   = 32;
+  const GAP     = 2;
+  const cellW   = Math.min(30, Math.max(8, Math.floor((W - LABEL_W - PAD_R) / Math.max(showThru, 1))));
+  const H       = PAD_T + n * ROW_H + PAD_B;
+
+  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" style="font-family:Inter,system-ui,sans-serif">`];
+
+  // Lap number labels along the top
+  const lapStep = showThru <= 15 ? 2 : showThru <= 35 ? 5 : 10;
+  for (let l = 1; l <= showThru; l++) {
+    if (l === 1 || l === showThru || l % lapStep === 0) {
+      const x = LABEL_W + (l - 0.5) * cellW;
+      parts.push(`<text x="${x.toFixed(1)}" y="16" fill="#44447a" font-size="10" text-anchor="middle">${l}</text>`);
+    }
+  }
+
+  // Driver rows
+  sorted.forEach((driver, ri) => {
+    const y0    = PAD_T + ri * ROW_H;
+    const color = colorOf[driver.driverName];
+    const label = driver.driverName.length > 13 ? driver.driverName.slice(0, 12) + '…' : driver.driverName;
+
+    // Pos badge + driver name label
+    parts.push(`<text x="20" y="${(y0 + ROW_H / 2 + 4).toFixed(1)}" fill="${color}" font-size="10" text-anchor="middle" opacity="0.55" data-driver="${escHtml(driver.driverName)}">P${driver.position}</text>`);
+    parts.push(`<text x="${LABEL_W - 8}" y="${(y0 + ROW_H / 2 + 4).toFixed(1)}" fill="${color}" font-size="11" text-anchor="end" font-weight="600" data-driver="${escHtml(driver.driverName)}">${escHtml(label)}</text>`);
+
+    for (let l = 1; l <= showThru; l++) {
+      const t    = driver.lapTimes[l - 1];
+      const meta = driver.lapMeta?.[l - 1] ?? { type: 'clean', delta: 0 };
+      const x0   = LABEL_W + (l - 1) * cellW;
+      const rx   = x0 + GAP / 2, ry = y0 + GAP / 2;
+      const rw   = cellW - GAP, rh = ROW_H - GAP;
+
+      const isRaceFL = t != null && t === raceFLMs && driver.driverName === raceFLDriver && isFinite(raceFLMs);
+      const isPB     = !isRaceFL && t != null && t === driver.fastestLapMs;
+
+      let fill, extraClass = '';
+      if (t == null) {
+        fill = '#0f0f1a';
+      } else if (meta.type === 'floor') {
+        fill = '#131320'; // pit / filtered — barely visible
+      } else if (meta.type === 'incident') {
+        extraClass = 'hm-inc';
+        fill = meta.delta > 4000 ? '#6e0000' : meta.delta > 2000 ? '#a01828' : '#cc3030';
+      } else if (isRaceFL) {
+        fill = '#f5c842';
+      } else if (isPB) {
+        fill = color;
+      } else {
+        // Shade by distance from personal best
+        const ref = driver.fastestLapMs ?? t;
+        const drift = ref ? (t - ref) / ref : 0;
+        if      (drift < 0.03) fill = color + 'cc';
+        else if (drift < 0.08) fill = color + '77';
+        else if (drift < 0.15) fill = color + '3a';
+        else                   fill = '#b06010';  // notably slow
+      }
+
+      const curPos = posMap[driver.driverName]?.[l] ?? driver.position;
+      const da = `data-lap="${l}" data-driver="${escHtml(driver.driverName)}" data-pos="${curPos}" data-laptime="${t ?? 'null'}" data-gap="null" data-delta="null" data-color="${color}" data-incident="${meta.type === 'incident' ? 1 : 0}" data-fl="${isRaceFL ? 1 : 0}"`;
+
+      parts.push(`<rect class="${extraClass}" x="${rx.toFixed(1)}" y="${ry.toFixed(1)}" width="${rw.toFixed(1)}" height="${rh.toFixed(1)}" fill="${fill}" rx="3" ${da}/>`);
+
+      // Race FL: small star overlay
+      if (isRaceFL) {
+        const sx = rx + rw / 2, sy = ry + rh / 2 + 4;
+        parts.push(`<text x="${sx.toFixed(1)}" y="${sy.toFixed(1)}" fill="#1a1000" font-size="11" text-anchor="middle" font-weight="700" pointer-events="none">★</text>`);
+      }
+    }
+  });
+
+  // Legend strip
+  const ly = PAD_T + n * ROW_H + 10;
+  const exColor = DRIVER_COLORS[0];
+  const legendItems = [
+    ['#f5c842',      '★ FL of race'],
+    [exColor,        'Personal best'],
+    [exColor + 'cc', 'Clean lap'],
+    ['#b06010',      'Slow lap'],
+    ['#cc3030',      '💥 Incident'],
+    ['#131320',      'Pit'],
+  ];
+  let lx = LABEL_W;
+  for (const [fc, label] of legendItems) {
+    parts.push(`<rect x="${lx.toFixed(1)}" y="${(ly - 8).toFixed(1)}" width="11" height="11" fill="${fc}" rx="2"/>`);
+    parts.push(`<text x="${(lx + 14).toFixed(1)}" y="${(ly + 2).toFixed(1)}" fill="#44447a" font-size="10">${escHtml(label)}</text>`);
+    lx += label.replace(/[^\x00-\x7F]/g, '  ').length * 5.8 + 20;
+  }
+
+  parts.push('</svg>');
+  container.className = '';
+  container.innerHTML = parts.join('');
+  applyHighlight();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Event Summary  (heat card grid when no race is selected)
+// ═══════════════════════════════════════════════════════════════
+function renderEventSummary() {
+  if (!currentEvent || !currentEvent.heats.length) return;
+  const area = document.getElementById('vizArea');
+  const mains = currentEvent.heats.filter(h => /main|final/i.test(h.label));
+  const quals  = currentEvent.heats.filter(h => !/main|final/i.test(h.label));
+  const groups = [];
+  if (mains.length) groups.push({ label: 'Main Events', heats: mains });
+  if (quals.length) groups.push({ label: 'Qualifiers / Heats', heats: quals });
+  if (!groups.length) groups.push({ label: '', heats: currentEvent.heats });
+
+  let html = '';
+  for (const g of groups) {
+    if (g.label) html += `<div style="font-size:10px;font-weight:600;color:#32325a;text-transform:uppercase;letter-spacing:1px;padding:8px 2px 6px">${escHtml(g.label)}</div>`;
+    html += `<div class="event-summary-grid">`;
+    for (const heat of g.heats) {
+      html += `<div class="event-heat-card" onclick="selectHeat('${escHtml(heat.raceId)}')">
+        <div class="ehc-name">${escHtml(heat.label)}</div>
+        <span class="ehc-badge">Click to load</span>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+  area.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  Heat list rendering
 // ═══════════════════════════════════════════════════════════════
 function renderHeatList() {
@@ -1341,17 +2042,20 @@ async function loadEvent() {
     document.getElementById('raceSub').textContent   = `${currentEvent.heats.length} heat${currentEvent.heats.length !== 1 ? 's' : ''} — click one to load`;
     document.getElementById('lapCounter').textContent = '—';
     document.getElementById('raceTime').textContent   = '';
-    document.getElementById('vizArea').innerHTML      = `<div class="empty-state">
-      <div class="icon">🏁</div><div>Select a race from the left panel</div></div>`;
-    document.getElementById('statsArea').innerHTML   = '';
-    document.getElementById('spicyArea').innerHTML   = '';
-    document.getElementById('playBtn').disabled      = true;
-    document.getElementById('chartToggleBtn').style.display = 'none';
-    document.getElementById('scrubberWrap').style.display   = 'none';
-    document.getElementById('spicyPanel').style.display     = 'none';
-    document.getElementById('rh-spicy').style.display       = 'none';
+    document.getElementById('statsArea').innerHTML      = '';
+    document.getElementById('fastestLapsArea').innerHTML = '';
+    document.getElementById('spicyArea').innerHTML       = '';
+    document.getElementById('playBtn').disabled          = true;
+    document.getElementById('raceControls').style.display  = 'none';
+    document.getElementById('statsHeader').style.display   = 'none';
+    document.getElementById('scrubberWrap').style.display  = 'none';
+    document.getElementById('spicyPanel').style.display    = 'none';
+    document.getElementById('rh-spicy').style.display      = 'none';
+    document.getElementById('vizWrap').style.display       = '';
+    document.getElementById('tableWrap').style.display     = 'none';
 
     renderHeatList();
+    renderEventSummary();
     pushUrlHash();
   } catch (err) {
     document.getElementById('heatList').innerHTML =
@@ -1425,15 +2129,30 @@ async function loadRaceUrl(url) {
     document.getElementById('raceTitle').textContent = label;
     document.getElementById('raceSub').textContent   = `${race.results.length} drivers`;
     document.getElementById('raceTime').textContent  = leader.totalTimeMs ? `Race time: ${msToStr(leader.totalTimeMs)}` : '';
-    document.getElementById('playBtn').disabled      = false;
-    document.getElementById('chartToggleBtn').style.display = 'inline-block';
-    document.getElementById('spicyPanel').style.display     = 'flex';
-    document.getElementById('rh-spicy').style.display       = 'block';
+    document.getElementById('playBtn').disabled          = false;
+    document.getElementById('raceControls').style.display  = 'flex';
+    document.getElementById('statsHeader').style.display   = 'flex';
+    document.getElementById('spicyPanel').style.display    = 'flex';
+    document.getElementById('rh-spicy').style.display      = 'block';
+    // Restore chart view + uncollapsed cards when loading a new race
+    cardsCollapsed = false;
+    document.getElementById('cardsCollapseBtn').textContent = '▾ Collapse';
+    viewMode = 'chart';
+    chartMode = 'position';
+    document.getElementById('vizWrap').style.display   = '';
+    document.getElementById('tableWrap').style.display = 'none';
+    document.querySelectorAll('.chart-tab').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('onclick').includes("'position'"));
+    });
+    document.querySelectorAll('.view-tab').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('onclick').includes("'chart'"));
+    });
 
     updateHeader();
     updateScrubber();
     renderVisualization();
     renderStats();
+    renderConsistency();
     renderHeatList();       // update active highlight
     generateSpicyAnalysis();
     pushUrlHash();
