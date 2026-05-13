@@ -81,12 +81,39 @@
       overflow: hidden;
     }
 
+    /* ── Resize handles ────────────────────────────────────────────── */
+    .resize-handle {
+      width: 5px;
+      flex-shrink: 0;
+      background: #1e1e32;
+      cursor: col-resize;
+      position: relative;
+      transition: background 0.15s;
+      z-index: 10;
+    }
+    .resize-handle:hover,
+    .resize-handle.resizing { background: #3535a0; }
+    .resize-handle::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      height: 32px;
+      width: 2px;
+      background: #6060c0;
+      border-radius: 1px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .resize-handle:hover::after,
+    .resize-handle.resizing::after { opacity: 1; }
+
     /* ── Left sidebar ───────────────────────────────────────────────── */
     #sidebar-left {
       width: 190px;
-      min-width: 190px;
+      min-width: 120px;
       background: #101018;
-      border-right: 1px solid #1e1e32;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -173,9 +200,8 @@
     /* ── Right sidebar ──────────────────────────────────────────────── */
     #sidebar-right {
       width: 225px;
-      min-width: 225px;
+      min-width: 120px;
       background: #101018;
-      border-left: 1px solid #1e1e32;
       overflow-y: auto;
       padding: 10px;
     }
@@ -326,7 +352,7 @@
 <div id="main">
 
   <!-- Left sidebar -->
-  <div id="sidebar-left">
+  <div id="sidebar-left" style="width:190px">
     <h3>Race Night</h3>
     <div id="heatList">
       <div class="empty-state" style="height:auto;padding:20px 0;font-size:11px;color:#444;">
@@ -334,6 +360,8 @@
       </div>
     </div>
   </div>
+
+  <div class="resize-handle" id="rh-left"></div>
 
   <!-- Center -->
   <div id="center">
@@ -365,8 +393,10 @@
     </div>
   </div>
 
+  <div class="resize-handle" id="rh-right"></div>
+
   <!-- Right sidebar -->
-  <div id="sidebar-right">
+  <div id="sidebar-right" style="width:225px">
     <div id="statsArea"></div>
     <div id="spicyArea"></div>
   </div>
@@ -1003,7 +1033,7 @@ function scrubToLap(lap) {
 function updateScrubber() {
   const wrap = document.getElementById('scrubberWrap');
   if (!currentHeat) { wrap.style.display = 'none'; return; }
-  wrap.style.display = '';
+  wrap.style.display = 'block';
   const pct = maxLeaderLap > 0 ? (leaderLap / maxLeaderLap) * 100 : 0;
   document.getElementById('scrubberFill').style.width = pct + '%';
   document.getElementById('scrubberThumb').style.left = pct + '%';
@@ -1309,7 +1339,7 @@ async function loadRaceUrl(url) {
     document.getElementById('raceSub').textContent   = `${race.results.length} drivers`;
     document.getElementById('raceTime').textContent  = leader.totalTimeMs ? `Race time: ${msToStr(leader.totalTimeMs)}` : '';
     document.getElementById('playBtn').disabled      = false;
-    document.getElementById('chartToggleBtn').style.display = '';
+    document.getElementById('chartToggleBtn').style.display = 'inline-block';
 
     updateHeader();
     updateScrubber();
@@ -1462,6 +1492,48 @@ document.addEventListener('keydown', e => {
   });
   document.addEventListener('mousemove', e => { if (dragging) scrubFromEvent(e); });
   document.addEventListener('mouseup',   () => { dragging = false; thumb.classList.remove('dragging'); });
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  Resizable panels
+// ═══════════════════════════════════════════════════════════════
+(function () {
+  function makeResizable(handleId, targetId, side) {
+    const handle = document.getElementById(handleId);
+    const target = document.getElementById(targetId);
+    let startX, startW;
+
+    handle.addEventListener('mousedown', e => {
+      startX = e.clientX;
+      startW = target.offsetWidth;
+      handle.classList.add('resizing');
+      document.body.style.cursor      = 'col-resize';
+      document.body.style.userSelect  = 'none';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (!handle.classList.contains('resizing')) return;
+      const delta = side === 'left' ? e.clientX - startX : startX - e.clientX;
+      const newW  = Math.max(120, Math.min(500, startW + delta));
+      target.style.width    = newW + 'px';
+      target.style.minWidth = newW + 'px';
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!handle.classList.contains('resizing')) return;
+      handle.classList.remove('resizing');
+      document.body.style.cursor     = '';
+      document.body.style.userSelect = '';
+      if (currentHeat) {
+        clearTimeout(resizeDebounce);
+        resizeDebounce = setTimeout(() => renderVisualization(), 80);
+      }
+    });
+  }
+
+  makeResizable('rh-left',  'sidebar-left',  'left');
+  makeResizable('rh-right', 'sidebar-right', 'right');
 })();
 
 // ═══════════════════════════════════════════════════════════════
