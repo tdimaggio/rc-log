@@ -666,7 +666,7 @@ function msToStr(ms) {
 async function fetchLiverc(url) {
   const enc = encodeURIComponent(url);
   const proxies = [
-    `http://localhost:3001/proxy?url=${enc}`,               // local proxy.mjs (best)
+    `/proxy?url=${enc}`,                                     // local proxy.mjs (best)
     `https://api.allorigins.win/raw?url=${enc}`,            // external fallback 1
     `https://corsproxy.io/?url=${enc}`,                     // external fallback 2
   ];
@@ -2386,7 +2386,7 @@ if (!document.getElementById('raceUrl').value) {
 // Auto-load Gemini key from proxy .env (silently skip if proxy isn't running)
 (async () => {
   try {
-    const res = await fetch('http://localhost:3001/env', { signal: AbortSignal.timeout(2000) });
+    const res = await fetch('/env', { signal: AbortSignal.timeout(2000) });
     if (!res.ok) return;
     const env = await res.json();
     if (env.GEMINI_KEY) {
