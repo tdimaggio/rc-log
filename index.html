@@ -2387,6 +2387,11 @@ async function loadRaceUrl(url) {
     renderVisualization();
     renderStats();
     renderConsistency();
+    if (isMobile()) {
+      renderMobileCharts();
+      document.getElementById('mobile-drivers').innerHTML =
+        document.getElementById('statsArea').innerHTML;
+    }
     renderHeatList();       // update active highlight
     generateSpicyAnalysis();
     pushUrlHash();
