@@ -547,6 +547,7 @@
   </div>
   <span class="sep">|</span>
   <input type="password" id="apiKeyInput" placeholder="Gemini API Key" />
+  <button class="btn" id="switchModeBtn" style="display:none" onclick="clearForceDesktop()">📱 Mobile</button>
 </div>
 
 <!-- ── Main ───────────────────────────────────────────────────── -->
@@ -632,6 +633,33 @@
   </div>
 
 </div>
+
+<!-- ── Mobile View ────────────────────────────────────────────────── -->
+<div id="mobileView">
+  <div class="mobile-section-label">🔥 Race Analysis</div>
+  <div id="mobile-analysis"><span style="color:#555555">Load a race using the button above.</span></div>
+
+  <div class="mobile-section-label">Position</div>
+  <div class="mobile-chart-wrap" id="mobile-chart-position"></div>
+
+  <div class="mobile-section-label">Lap Times</div>
+  <div class="mobile-chart-wrap" id="mobile-chart-laptime"></div>
+
+  <div class="mobile-section-label">Gap to Leader</div>
+  <div class="mobile-chart-wrap" id="mobile-chart-gap"></div>
+
+  <div class="mobile-section-label">Pace (3-lap avg)</div>
+  <div class="mobile-chart-wrap" id="mobile-chart-pace"></div>
+
+  <div class="mobile-section-label">Heat Map</div>
+  <div class="mobile-chart-wrap" id="mobile-chart-heatmap"></div>
+
+  <div class="mobile-section-label">Drivers</div>
+  <div id="mobile-drivers"></div>
+
+  <button class="btn" id="mobile-desktop-btn" onclick="forceDesktop()">🖥 Desktop Version</button>
+</div>
+
 <div id="tooltip"></div>
 <div id="driver-popup"></div>
 
