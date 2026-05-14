@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RC Race Replay</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
-      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-      background: #0d0d14;
-      color: #dddde8;
+      font-family: 'Barlow Condensed', system-ui, -apple-system, sans-serif;
+      background: #0d0d0d;
+      color: #e0e0e0;
       height: 100%;
       overflow: hidden;
       font-size: 13px;
@@ -25,8 +25,11 @@
 
     /* ── Header ─────────────────────────────────────────────────────── */
     #header {
-      background: #12121c;
-      border-bottom: 1px solid #1e1e32;
+      background-color: #141414;
+      background-image:
+        repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.018) 2px, rgba(255,255,255,0.018) 3px),
+        repeating-linear-gradient(-45deg, transparent, transparent 2px, rgba(255,255,255,0.018) 2px, rgba(255,255,255,0.018) 3px);
+      border-bottom: 1px solid #222222;
       padding: 10px 16px;
       display: flex;
       gap: 10px;
@@ -35,16 +38,16 @@
       flex-shrink: 0;
     }
     #header input[type="text"] {
-      background: #0a0a12;
-      border: 1px solid #28284a;
-      color: #dddde8;
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+      color: #e0e0e0;
       padding: 7px 11px;
       font-size: 13px;
       font-family: inherit;
       border-radius: 7px;
       transition: border-color 0.15s, background 0.15s;
     }
-    #header input[type="text"]:focus { outline: none; border-color: #5050a0; background: #0f0f1e; }
+    #header input[type="text"]:focus { outline: none; border-color: #e53935; background: #0f0f0f; }
     #eventUrl  { width: 260px; }
     #raceUrl   { width: 260px; }
     #apiKeyInput { width: 210px; }
@@ -56,8 +59,8 @@
       top: calc(100% + 4px);
       left: 0;
       min-width: 280px;
-      background: #12121c;
-      border: 1px solid #2a2a4a;
+      background: #141414;
+      border: 1px solid #2a2a2a;
       border-radius: 8px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.5);
       z-index: 999;
@@ -68,21 +71,21 @@
       padding: 9px 14px;
       cursor: pointer;
       font-size: 12px;
-      color: #cccce0;
+      color: #cccccc;
       display: flex;
       justify-content: space-between;
       gap: 12px;
-      border-bottom: 1px solid #1e1e32;
+      border-bottom: 1px solid #222222;
     }
     .sss-item:last-child { border-bottom: none; }
-    .sss-item:hover { background: #1e1e38; color: #fff; }
+    .sss-item:hover { background: #202020; color: #fff; }
     .sss-item .sss-heats { color: #666; font-size: 11px; flex-shrink: 0; }
     .sss-status { padding: 10px 14px; font-size: 12px; color: #666; font-style: italic; }
 
     .btn {
-      background: #1c1c30;
-      border: 1px solid #2c2c50;
-      color: #b8b8d0;
+      background: #1c1c1c;
+      border: 1px solid #2a2a2a;
+      color: #bbbbbb;
       padding: 7px 14px;
       font-size: 13px;
       font-family: inherit;
@@ -92,15 +95,15 @@
       white-space: nowrap;
       transition: background 0.15s, border-color 0.15s;
     }
-    .btn:hover { background: #252540; border-color: #3c3c68; color: #dddde8; }
+    .btn:hover { background: #252525; border-color: #3a3a3a; color: #e0e0e0; }
     .btn-primary { background: #c0392b; border-color: #c0392b; color: #fff; }
     .btn-primary:hover { background: #e74c3c; border-color: #e74c3c; }
     .btn-primary:disabled { background: #4a1a18; border-color: #4a1a18; color: #666; cursor: default; }
 
-    .sep { color: #242440; margin: 0 4px; user-select: none; }
+    .sep { color: #242424; margin: 0 4px; user-select: none; }
 
     .speed-wrap {
-      display: flex; align-items: center; gap: 8px; font-size: 13px; color: #66669a;
+      display: flex; align-items: center; gap: 8px; font-size: 13px; color: #777777;
     }
     #speedSlider { width: 80px; accent-color: #e53935; }
 
@@ -115,14 +118,14 @@
     .resize-handle {
       width: 5px;
       flex-shrink: 0;
-      background: #1e1e32;
+      background: #222222;
       cursor: col-resize;
       position: relative;
       transition: background 0.15s;
       z-index: 10;
     }
     .resize-handle:hover,
-    .resize-handle.resizing { background: #3535a0; }
+    .resize-handle.resizing { background: #cc0000; }
     .resize-handle::after {
       content: '';
       position: absolute;
@@ -131,7 +134,7 @@
       transform: translate(-50%, -50%);
       height: 32px;
       width: 2px;
-      background: #6060c0;
+      background: #888888;
       border-radius: 1px;
       opacity: 0;
       transition: opacity 0.15s;
@@ -143,7 +146,7 @@
     #sidebar-left {
       width: 190px;
       min-width: 120px;
-      background: #101018;
+      background: #111111;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -151,7 +154,7 @@
     #sidebar-left h3 {
       font-size: 10px;
       font-weight: 600;
-      color: #44447a;
+      color: #555555;
       text-transform: uppercase;
       letter-spacing: 1.5px;
       padding: 12px 12px 6px;
@@ -165,7 +168,7 @@
     .heat-section {
       font-size: 10px;
       font-weight: 600;
-      color: #32325a;
+      color: #444444;
       text-transform: uppercase;
       letter-spacing: 1px;
       padding: 10px 6px 4px;
@@ -175,7 +178,7 @@
       font-size: 12px;
       cursor: pointer;
       border-radius: 6px;
-      color: #66669a;
+      color: #777777;
       margin-bottom: 2px;
       line-height: 1.4;
       white-space: nowrap;
@@ -183,7 +186,7 @@
       text-overflow: ellipsis;
       transition: background 0.1s, color 0.1s;
     }
-    .heat-item:hover { background: #1a1a2e; color: #c0c0d8; }
+    .heat-item:hover { background: #1a1a1a; color: #c0c0c0; }
     .heat-item.active { background: #c0392b; color: #fff; font-weight: 500; }
 
     /* ── Center ─────────────────────────────────────────────────────── */
@@ -195,18 +198,18 @@
       min-width: 0;
     }
     #race-header {
-      background: #101018;
-      border-bottom: 1px solid #1e1e32;
+      background: #111111;
+      border-bottom: 1px solid #222222;
       padding: 10px 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-shrink: 0;
     }
-    #raceTitle    { font-size: 15px; font-weight: 600; color: #e8e8f4; }
-    #raceSub      { font-size: 12px; color: #44447a; margin-top: 3px; }
+    #raceTitle    { font-size: 15px; font-weight: 600; color: #e8e8e8; }
+    #raceSub      { font-size: 12px; color: #555555; margin-top: 3px; }
     #lapCounter   { font-size: 22px; font-weight: 700; color: #e53935; letter-spacing: -0.5px; }
-    #raceTime     { font-size: 12px; color: #66669a; text-align: right; margin-top: 3px; }
+    #raceTime     { font-size: 12px; color: #777777; text-align: right; margin-top: 3px; }
 
     #vizWrap {
       flex: 1;
@@ -221,7 +224,7 @@
       align-items: center;
       justify-content: center;
       height: 300px;
-      color: #2a2a48;
+      color: #333333;
       font-size: 13px;
       gap: 10px;
     }
@@ -231,14 +234,14 @@
     #sidebar-right {
       width: 225px;
       min-width: 120px;
-      background: #101018;
+      background: #111111;
       overflow-y: auto;
       padding: 10px;
     }
 
     .stat-card {
-      background: #0a0a12;
-      border: 1px solid #1e1e32;
+      background: #0a0a0a;
+      border: 1px solid #222222;
       border-radius: 9px;
       padding: 12px 13px;
       margin-bottom: 10px;
@@ -252,20 +255,20 @@
     }
     .stat-card .card-sub {
       font-size: 11px;
-      color: #36365e;
+      color: #444444;
       margin-bottom: 9px;
     }
     .stat-row {
       display: flex;
       justify-content: space-between;
       margin-bottom: 5px;
-      color: #55558a;
+      color: #666666;
     }
-    .stat-row .v { color: #dddde8; }
+    .stat-row .v { color: #e0e0e0; }
 
     .spicy-card {
-      background: #0a0a12;
-      border: 1px solid #1e1e32;
+      background: #0a0a0a;
+      border: 1px solid #222222;
       border-radius: 9px;
       padding: 12px 13px;
       font-size: 12px;
@@ -276,8 +279,8 @@
       font-weight: 600;
       margin-bottom: 9px;
     }
-    .spicy-text { color: #8888b0; line-height: 1.7; }
-    .spicy-text.loading { color: #36365e; font-style: italic; }
+    .spicy-text { color: #888888; line-height: 1.7; }
+    .spicy-text.loading { color: #444444; font-style: italic; }
 
     .error-msg { color: #e53935; font-size: 12px; }
 
@@ -285,33 +288,33 @@
     #tooltip {
       position: fixed;
       pointer-events: none;
-      background: #12121e;
-      border: 1px solid #2a2a50;
+      background: #141414;
+      border: 1px solid #2a2a2a;
       border-radius: 9px;
       padding: 10px 13px;
       font-size: 12px;
-      color: #dddde8;
+      color: #e0e0e0;
       z-index: 1000;
       display: none;
       min-width: 170px;
       box-shadow: 0 6px 24px rgba(0,0,0,0.6);
     }
     .tt-driver { font-weight: 700; font-size: 13px; margin-bottom: 7px; }
-    .tt-row { display: flex; justify-content: space-between; gap: 14px; margin-bottom: 4px; color: #55558a; }
-    .tt-row .tt-v { color: #dddde8; font-variant-numeric: tabular-nums; }
-    .tt-divider { border: none; border-top: 1px solid #1e1e35; margin: 6px 0; }
+    .tt-row { display: flex; justify-content: space-between; gap: 14px; margin-bottom: 4px; color: #666666; }
+    .tt-row .tt-v { color: #e0e0e0; font-variant-numeric: tabular-nums; }
+    .tt-divider { border: none; border-top: 1px solid #222222; margin: 6px 0; }
     .tt-badge { font-size: 11px; margin-top: 5px; }
 
     /* ── Scrubber ───────────────────────────────────────────────────── */
     #scrubberWrap {
       padding: 0 18px 10px;
       flex-shrink: 0;
-      background: #101018;
+      background: #111111;
       display: none;
     }
     #scrubberTrack {
       height: 5px;
-      background: #1a1a2e;
+      background: #1a1a1a;
       border-radius: 3px;
       position: relative;
       cursor: pointer;
@@ -332,7 +335,7 @@
       height: 13px;
       border-radius: 50%;
       background: #e53935;
-      border: 2px solid #dddde8;
+      border: 2px solid #e0e0e0;
       cursor: grab;
       opacity: 0;
       transition: opacity 0.15s;
@@ -344,7 +347,7 @@
     /* ── Driver highlight ───────────────────────────────────────────── */
     .stat-card { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
     .stat-card.highlighted { border-color: var(--card-color, #e53935); box-shadow: 0 0 0 1px var(--card-color, #e53935); }
-    .compact-driver-row.highlighted { background: #12122a; box-shadow: inset 3px 0 0 var(--card-color, #e53935); }
+    .compact-driver-row.highlighted { background: #1a1a1a; box-shadow: inset 3px 0 0 var(--card-color, #e53935); }
 
     /* ── Driver hover popup ─────────────────────────────────────────── */
     #driver-popup {
@@ -352,8 +355,8 @@
       position: fixed;
       z-index: 300;
       width: 200px;
-      background: #0a0a12;
-      border: 1px solid #3535a0;
+      background: #0a0a0a;
+      border: 1px solid #cc0000;
       border-radius: 9px;
       padding: 10px 12px;
       font-size: 12px;
@@ -361,7 +364,7 @@
       pointer-events: none;
     }
     #driver-popup .dp-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
-    #driver-popup .dp-sparkline { margin-bottom: 8px; border-bottom: 1px solid #1e1e32; padding-bottom: 8px; }
+    #driver-popup .dp-sparkline { margin-bottom: 8px; border-bottom: 1px solid #222222; padding-bottom: 8px; }
 
     /* ── Viz cursor ─────────────────────────────────────────────────── */
     #vizWrap svg { cursor: crosshair; }
@@ -370,13 +373,13 @@
     .resize-handle-h {
       height: 5px;
       flex-shrink: 0;
-      background: #1e1e32;
+      background: #222222;
       cursor: row-resize;
       position: relative;
       transition: background 0.15s;
     }
     .resize-handle-h:hover,
-    .resize-handle-h.resizing { background: #3535a0; }
+    .resize-handle-h.resizing { background: #cc0000; }
     .resize-handle-h::after {
       content: '';
       position: absolute;
@@ -385,7 +388,7 @@
       transform: translate(-50%, -50%);
       width: 32px;
       height: 2px;
-      background: #6060c0;
+      background: #888888;
       border-radius: 1px;
       opacity: 0;
       transition: opacity 0.15s;
@@ -398,7 +401,7 @@
       height: 220px;
       min-height: 60px;
       flex-shrink: 0;
-      background: #101018;
+      background: #111111;
       display: none;
       flex-direction: column;
       overflow: hidden;
@@ -408,7 +411,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 7px 18px;
-      border-bottom: 1px solid #1e1e32;
+      border-bottom: 1px solid #222222;
       flex-shrink: 0;
     }
     #spicyPanelTitle {
@@ -420,18 +423,18 @@
       flex: 1;
       overflow-y: auto;
       padding: 12px 18px;
-      color: #8888b0;
+      color: #888888;
       font-size: 13px;
       line-height: 1.75;
     }
-    #spicyScroll .loading { color: #36365e; font-style: italic; }
+    #spicyScroll .loading { color: #444444; font-style: italic; }
     #spicyScroll .error-msg { color: #e53935; }
 
     /* scrollbar */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: #0d0d14; }
-    ::-webkit-scrollbar-thumb { background: #222240; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #2e2e55; }
+    ::-webkit-scrollbar-track { background: #0d0d0d; }
+    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #333333; }
 
     /* ── Heatmap incident pulse ─────────────────────────────────── */
     @keyframes hm-pulse { 0%,100% { opacity:.9; } 50% { opacity:.45; } }
@@ -440,46 +443,46 @@
     /* ── Chart tabs ─────────────────────────────────────────────── */
     .chart-tabs { display: flex; gap: 3px; }
     .chart-tab {
-      background: #1c1c30; border: 1px solid #2c2c50; color: #66669a;
+      background: #1c1c1c; border: 1px solid #2a2a2a; color: #777777;
       padding: 5px 10px; font-size: 12px; font-family: inherit; cursor: pointer;
       border-radius: 5px; white-space: nowrap; transition: background 0.15s;
     }
-    .chart-tab:hover { background: #252540; color: #dddde8; }
-    .chart-tab.active { background: #1a2040; border-color: #3040a0; color: #8090e0; }
+    .chart-tab:hover { background: #252525; color: #e0e0e0; }
+    .chart-tab.active { background: #1a0a0a; border-color: #cc0000; color: #e53935; }
 
     /* ── View toggle ─────────────────────────────────────────────── */
     .view-tabs { display: flex; gap: 3px; margin-bottom: 4px; }
     .view-tab {
-      background: #1c1c30; border: 1px solid #2c2c50; color: #66669a;
+      background: #1c1c1c; border: 1px solid #2a2a2a; color: #777777;
       padding: 4px 9px; font-size: 11px; font-family: inherit; cursor: pointer;
       border-radius: 4px; white-space: nowrap; transition: background 0.15s;
     }
-    .view-tab:hover { background: #252540; color: #dddde8; }
+    .view-tab:hover { background: #252525; color: #e0e0e0; }
     .view-tab.active { background: #3c1a20; border-color: #c0392b; color: #e57373; }
 
     /* ── Table view ──────────────────────────────────────────────── */
     #tableWrap { flex: 1; overflow: auto; display: none; }
     .timing-table { border-collapse: collapse; font-size: 11px; white-space: nowrap; }
     .timing-table th {
-      background: #101018; padding: 4px 8px; color: #44447a; font-weight: 600;
-      position: sticky; top: 0; z-index: 1; border-bottom: 1px solid #1e1e32;
+      background: #111111; padding: 4px 8px; color: #555555; font-weight: 600;
+      position: sticky; top: 0; z-index: 1; border-bottom: 1px solid #222222;
       text-align: center;
     }
     .timing-driver-col {
       position: sticky; left: 0; z-index: 2; min-width: 130px; padding: 4px 8px;
-      border-right: 1px solid #1e1e32; font-weight: 500; text-align: left;
-      background: #0d0d14;
+      border-right: 1px solid #222222; font-weight: 500; text-align: left;
+      background: #0d0d0d;
     }
-    th.timing-driver-col { z-index: 3; background: #101018; }
+    th.timing-driver-col { z-index: 3; background: #111111; }
     .timing-table td {
-      padding: 3px 7px; border-bottom: 1px solid #0f0f1a;
-      text-align: center; color: #55558a;
+      padding: 3px 7px; border-bottom: 1px solid #111111;
+      text-align: center; color: #666666;
     }
-    .timing-table tbody tr:hover td { background: #111120; }
+    .timing-table tbody tr:hover td { background: #111111; }
     .timing-fl  { background: #0a2a15 !important; color: #4caf50 !important; font-weight: 600; }
     .timing-pb  { background: #2a2800 !important; color: #f5c842 !important; }
     .timing-inc { background: #1a0808 !important; color: #e53935 !important; }
-    .timing-cur { box-shadow: inset 2px 0 0 #5050a0, inset -2px 0 0 #5050a0; }
+    .timing-cur { box-shadow: inset 2px 0 0 #e53935, inset -2px 0 0 #e53935; }
 
     /* ── Sparkline ───────────────────────────────────────────────── */
     .sparkline { display: block; margin-top: 3px; }
@@ -489,20 +492,20 @@
       display: flex; align-items: center; gap: 8px; padding: 4px 6px;
       border-radius: 6px; cursor: pointer; transition: background 0.1s;
     }
-    .compact-driver-row:hover { background: #1a1a2e; }
+    .compact-driver-row:hover { background: #1a1a1a; }
     .compact-pos-name { font-size: 12px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
 
     /* ── Fastest Laps Board ──────────────────────────────────────── */
     #fastestLapsArea { padding-top: 4px; }
     .fl-section-title {
-      font-size: 10px; font-weight: 600; color: #44447a;
+      font-size: 10px; font-weight: 600; color: #555555;
       text-transform: uppercase; letter-spacing: 1.5px; padding: 0 2px 8px;
     }
     .fl-row { margin-bottom: 8px; }
     .fl-row-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
     .fl-name { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
     .fl-time { font-size: 11px; font-variant-numeric: tabular-nums; flex-shrink: 0; }
-    .fl-bar-track { height: 4px; background: #1a1a2e; border-radius: 2px; }
+    .fl-bar-track { height: 4px; background: #1a1a1a; border-radius: 2px; }
     .fl-bar-fill  { height: 100%; border-radius: 2px; transition: width 0.15s; }
 
     /* ── Event summary grid ──────────────────────────────────────── */
@@ -512,14 +515,14 @@
       gap: 10px; padding: 4px;
     }
     .event-heat-card {
-      background: #0a0a12; border: 1px solid #1e1e32; border-radius: 9px;
+      background: #0a0a0a; border: 1px solid #222222; border-radius: 9px;
       padding: 12px; cursor: pointer; transition: border-color 0.15s, background 0.15s;
     }
-    .event-heat-card:hover { background: #12122a; border-color: #3535a0; }
-    .ehc-name { font-size: 12px; font-weight: 600; color: #c0c0d8; margin-bottom: 6px; line-height: 1.3; }
+    .event-heat-card:hover { background: #1a1a1a; border-color: #cc0000; }
+    .ehc-name { font-size: 12px; font-weight: 600; color: #c0c0c0; margin-bottom: 6px; line-height: 1.3; }
     .ehc-badge {
-      display: inline-block; background: #1a1a2e; border-radius: 4px;
-      padding: 2px 6px; font-size: 10px; color: #44447a; margin-right: 4px;
+      display: inline-block; background: #1a1a1a; border-radius: 4px;
+      padding: 2px 6px; font-size: 10px; color: #555555; margin-right: 4px;
     }
   </style>
 </head>
@@ -597,7 +600,7 @@
         <div class="empty-state">
           <div class="icon">🏁</div>
           <div>Paste a LiveRC results URL above to get started</div>
-          <div style="color:#2a2a50;font-size:10px;margin-top:4px">Works with any liverc.com subdomain</div>
+          <div style="color:#2a2a2a;font-size:10px;margin-top:4px">Works with any liverc.com subdomain</div>
         </div>
       </div>
     </div>
@@ -619,10 +622,10 @@
   <!-- Right sidebar -->
   <div id="sidebar-right" style="width:225px">
     <div id="statsHeader" style="display:none;padding:4px 2px 4px">
-      <span style="font-size:10px;font-weight:600;color:#44447a;text-transform:uppercase;letter-spacing:1.5px">Drivers</span>
+      <span style="font-size:10px;font-weight:600;color:#555555;text-transform:uppercase;letter-spacing:1.5px">Drivers</span>
     </div>
     <div id="statsArea"></div>
-    <div id="sparklineHint" style="display:none;font-size:9px;color:#44447a;font-style:italic;padding:2px 4px 10px;line-height:1.5">
+    <div id="sparklineHint" style="display:none;font-size:9px;color:#555555;font-style:italic;padding:2px 4px 10px;line-height:1.5">
       lap times &nbsp;·&nbsp; <span style="color:#c03030">●</span> incident
     </div>
     <div id="fastestLapsArea"></div>
@@ -1106,8 +1109,8 @@ function renderVisualization() {
   // Horizontal position lines
   for (let p = 1; p <= n; p++) {
     const y = yAt(p);
-    parts.push(`<line x1="${VIZ_ML}" y1="${y}" x2="${VIZ_ML + trackW}" y2="${y}" stroke="#1a1a2e" stroke-width="1"/>`);
-    parts.push(`<text x="${VIZ_ML - 8}" y="${y + 4}" fill="#44447a" font-size="12" text-anchor="end" font-family="Inter,system-ui,sans-serif" font-weight="500">${p}</text>`);
+    parts.push(`<line x1="${VIZ_ML}" y1="${y}" x2="${VIZ_ML + trackW}" y2="${y}" stroke="#1a1a1a" stroke-width="1"/>`);
+    parts.push(`<text x="${VIZ_ML - 8}" y="${y + 4}" fill="#555555" font-size="12" text-anchor="end" font-family="Inter,system-ui,sans-serif" font-weight="500">${p}</text>`);
   }
 
   // Vertical lap tick marks (every 5 laps, always include 0 and maxLap)
@@ -1116,11 +1119,11 @@ function renderVisualization() {
   for (let l = lapStep; l < maxLap; l += lapStep) tickLaps.add(l);
   for (const l of [...tickLaps].sort((a, b) => a - b)) {
     const x = xAt(l);
-    parts.push(`<line x1="${x}" y1="${VIZ_MT}" x2="${x}" y2="${VIZ_MT + trackH}" stroke="#1a1a2e" stroke-dasharray="2,4" stroke-width="1"/>`);
-    parts.push(`<text x="${x}" y="${VIZ_MT + trackH + 16}" fill="#44447a" font-size="11" text-anchor="middle" font-family="Inter,system-ui,sans-serif">${l}</text>`);
+    parts.push(`<line x1="${x}" y1="${VIZ_MT}" x2="${x}" y2="${VIZ_MT + trackH}" stroke="#1a1a1a" stroke-dasharray="2,4" stroke-width="1"/>`);
+    parts.push(`<text x="${x}" y="${VIZ_MT + trackH + 16}" fill="#555555" font-size="11" text-anchor="middle" font-family="Inter,system-ui,sans-serif">${l}</text>`);
   }
   // "Laps" axis label
-  parts.push(`<text x="${VIZ_ML + trackW / 2}" y="${H - 2}" fill="#32325a" font-size="10" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="500">Laps</text>`);
+  parts.push(`<text x="${VIZ_ML + trackW / 2}" y="${H - 2}" fill="#444444" font-size="10" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="500">Laps</text>`);
 
   // ── Driver lines ─────────────────────────────────────────────
   const showThru = Math.min(leaderLap, maxLap); // draw up to this lap
@@ -1274,7 +1277,7 @@ function showDriverPopup(el, driverName, colorIdx) {
   const consStr = driver.consistencyPct != null ? driver.consistencyPct.toFixed(1) + '%' : '—';
   const consColor = driver.consistencyPct != null
     ? (driver.consistencyPct >= 90 ? '#2ecc71' : driver.consistencyPct >= 75 ? '#f5c842' : '#e53935')
-    : '#55558a';
+    : '#666666';
   const incColor = driver.incidentCount ? '#e53935' : '#2ecc71';
 
   const popup = document.getElementById('driver-popup');
@@ -1332,8 +1335,8 @@ function renderConsistency() {
   const maxPct = Math.max(...withCons.map(d => d.displayPct ?? 0), 1);
   const hasAnyData = withCons.some(d => d.displayPct != null);
 
-  let html = `<div style="border-top:1px solid #1e1e32;margin-top:10px;padding-top:10px">
-    <div class="fl-section-title">Consistency ${hasAnyData ? '' : '<span style="color:#36365e;font-size:9px;font-weight:400">(no data)</span>'}</div>`;
+  let html = `<div style="border-top:1px solid #222222;margin-top:10px;padding-top:10px">
+    <div class="fl-section-title">Consistency ${hasAnyData ? '' : '<span style="color:#444444;font-size:9px;font-weight:400">(no data)</span>'}</div>`;
 
   for (const d of withCons) {
     const color = colorOf[d.driverName];
@@ -1341,7 +1344,7 @@ function renderConsistency() {
     const barW  = pct != null ? (pct / 100 * 100).toFixed(1) : 0;
     const consColor = pct != null
       ? (pct >= 90 ? '#2ecc71' : pct >= 75 ? '#f5c842' : '#e53935')
-      : '#36365e';
+      : '#444444';
     const label = d.driverName.length > 14 ? d.driverName.slice(0, 13) + '…' : d.driverName;
     html += `<div class="fl-row">
       <div class="fl-row-header">
@@ -1599,8 +1602,8 @@ function renderLapTimeChart() {
   const firstGrid = Math.ceil(minMs / step) * step;
   for (let t = firstGrid; t <= maxMs; t += step) {
     const y = yAt(t);
-    parts.push(`<line x1="${VIZ_ML}" y1="${y.toFixed(1)}" x2="${VIZ_ML + trackW}" y2="${y.toFixed(1)}" stroke="#1a1a2e" stroke-width="1"/>`);
-    parts.push(`<text x="${VIZ_ML - 6}" y="${(y + 4).toFixed(1)}" fill="#44447a" font-size="11" text-anchor="end" font-family="Inter,system-ui,sans-serif">${msToStr(t)}</text>`);
+    parts.push(`<line x1="${VIZ_ML}" y1="${y.toFixed(1)}" x2="${VIZ_ML + trackW}" y2="${y.toFixed(1)}" stroke="#1a1a1a" stroke-width="1"/>`);
+    parts.push(`<text x="${VIZ_ML - 6}" y="${(y + 4).toFixed(1)}" fill="#555555" font-size="11" text-anchor="end" font-family="Inter,system-ui,sans-serif">${msToStr(t)}</text>`);
   }
 
   // X-axis lap ticks
@@ -1609,10 +1612,10 @@ function renderLapTimeChart() {
   for (let l = lapStep; l < maxLap; l += lapStep) tickLaps.add(l);
   for (const l of [...tickLaps].sort((a, b) => a - b)) {
     const x = xAt(l);
-    parts.push(`<line x1="${x.toFixed(1)}" y1="${VIZ_MT}" x2="${x.toFixed(1)}" y2="${VIZ_MT + trackH}" stroke="#1a1a2e" stroke-dasharray="2,4" stroke-width="1"/>`);
-    parts.push(`<text x="${x.toFixed(1)}" y="${VIZ_MT + trackH + 16}" fill="#44447a" font-size="11" text-anchor="middle" font-family="Inter,system-ui,sans-serif">${l}</text>`);
+    parts.push(`<line x1="${x.toFixed(1)}" y1="${VIZ_MT}" x2="${x.toFixed(1)}" y2="${VIZ_MT + trackH}" stroke="#1a1a1a" stroke-dasharray="2,4" stroke-width="1"/>`);
+    parts.push(`<text x="${x.toFixed(1)}" y="${VIZ_MT + trackH + 16}" fill="#555555" font-size="11" text-anchor="middle" font-family="Inter,system-ui,sans-serif">${l}</text>`);
   }
-  parts.push(`<text x="${VIZ_ML + trackW / 2}" y="${H - 2}" fill="#32325a" font-size="10" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="500">Laps</text>`);
+  parts.push(`<text x="${VIZ_ML + trackW / 2}" y="${H - 2}" fill="#444444" font-size="10" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="500">Laps</text>`);
 
   // Driver lines + dots
   results.forEach(driver => {
@@ -1704,9 +1707,9 @@ function renderGapChart() {
   const gapStepMs = Math.max(1000, Math.ceil((maxGapMs / 1000) / 5) * 1000);
   for (let g = 0; g <= maxGapMs; g += gapStepMs) {
     const y = yAt(g);
-    parts.push(`<line x1="${VIZ_ML}" y1="${y.toFixed(1)}" x2="${VIZ_ML + trackW}" y2="${y.toFixed(1)}" stroke="#1a1a2e" stroke-width="1"/>`);
+    parts.push(`<line x1="${VIZ_ML}" y1="${y.toFixed(1)}" x2="${VIZ_ML + trackW}" y2="${y.toFixed(1)}" stroke="#1a1a1a" stroke-width="1"/>`);
     const label = g === 0 ? 'Leader' : `+${(g / 1000).toFixed(0)}s`;
-    parts.push(`<text x="${VIZ_ML - 6}" y="${(y + 4).toFixed(1)}" fill="#44447a" font-size="11" text-anchor="end" font-family="Inter,system-ui,sans-serif">${label}</text>`);
+    parts.push(`<text x="${VIZ_ML - 6}" y="${(y + 4).toFixed(1)}" fill="#555555" font-size="11" text-anchor="end" font-family="Inter,system-ui,sans-serif">${label}</text>`);
   }
 
   // X-axis
@@ -1715,10 +1718,10 @@ function renderGapChart() {
   for (let l = lapStep; l < maxLap; l += lapStep) tickLaps.add(l);
   for (const l of [...tickLaps].sort((a, b) => a - b)) {
     const x = xAt(l);
-    parts.push(`<line x1="${x.toFixed(1)}" y1="${VIZ_MT}" x2="${x.toFixed(1)}" y2="${VIZ_MT + trackH}" stroke="#1a1a2e" stroke-dasharray="2,4" stroke-width="1"/>`);
-    parts.push(`<text x="${x.toFixed(1)}" y="${VIZ_MT + trackH + 16}" fill="#44447a" font-size="11" text-anchor="middle" font-family="Inter,system-ui,sans-serif">${l}</text>`);
+    parts.push(`<line x1="${x.toFixed(1)}" y1="${VIZ_MT}" x2="${x.toFixed(1)}" y2="${VIZ_MT + trackH}" stroke="#1a1a1a" stroke-dasharray="2,4" stroke-width="1"/>`);
+    parts.push(`<text x="${x.toFixed(1)}" y="${VIZ_MT + trackH + 16}" fill="#555555" font-size="11" text-anchor="middle" font-family="Inter,system-ui,sans-serif">${l}</text>`);
   }
-  parts.push(`<text x="${VIZ_ML + trackW / 2}" y="${H - 2}" fill="#32325a" font-size="10" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="500">Laps</text>`);
+  parts.push(`<text x="${VIZ_ML + trackW / 2}" y="${H - 2}" fill="#444444" font-size="10" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="500">Laps</text>`);
 
   // Driver lines + dots
   results.forEach(driver => {
@@ -1819,8 +1822,8 @@ function renderPaceChart() {
   const step = Math.ceil((maxMs - minMs) / 5 / 500) * 500 || 1000;
   for (let t = Math.ceil(minMs / step) * step; t <= maxMs; t += step) {
     const y = yAt(t);
-    parts.push(`<line x1="${VIZ_ML}" y1="${y.toFixed(1)}" x2="${VIZ_ML + trackW}" y2="${y.toFixed(1)}" stroke="#1a1a2e" stroke-width="1"/>`);
-    parts.push(`<text x="${VIZ_ML - 6}" y="${(y + 4).toFixed(1)}" fill="#44447a" font-size="11" text-anchor="end" font-family="Inter,system-ui,sans-serif">${msToStr(t)}</text>`);
+    parts.push(`<line x1="${VIZ_ML}" y1="${y.toFixed(1)}" x2="${VIZ_ML + trackW}" y2="${y.toFixed(1)}" stroke="#1a1a1a" stroke-width="1"/>`);
+    parts.push(`<text x="${VIZ_ML - 6}" y="${(y + 4).toFixed(1)}" fill="#555555" font-size="11" text-anchor="end" font-family="Inter,system-ui,sans-serif">${msToStr(t)}</text>`);
   }
 
   // X-axis
@@ -1829,10 +1832,10 @@ function renderPaceChart() {
   for (let l = lapStep; l < maxLap; l += lapStep) tickLaps.add(l);
   for (const l of [...tickLaps].sort((a, b) => a - b)) {
     const x = xAt(l);
-    parts.push(`<line x1="${x.toFixed(1)}" y1="${VIZ_MT}" x2="${x.toFixed(1)}" y2="${VIZ_MT + trackH}" stroke="#1a1a2e" stroke-dasharray="2,4" stroke-width="1"/>`);
-    parts.push(`<text x="${x.toFixed(1)}" y="${VIZ_MT + trackH + 16}" fill="#44447a" font-size="11" text-anchor="middle" font-family="Inter,system-ui,sans-serif">${l}</text>`);
+    parts.push(`<line x1="${x.toFixed(1)}" y1="${VIZ_MT}" x2="${x.toFixed(1)}" y2="${VIZ_MT + trackH}" stroke="#1a1a1a" stroke-dasharray="2,4" stroke-width="1"/>`);
+    parts.push(`<text x="${x.toFixed(1)}" y="${VIZ_MT + trackH + 16}" fill="#555555" font-size="11" text-anchor="middle" font-family="Inter,system-ui,sans-serif">${l}</text>`);
   }
-  parts.push(`<text x="${VIZ_ML + trackW / 2}" y="${H - 2}" fill="#32325a" font-size="10" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="500">Laps (3-lap rolling avg)</text>`);
+  parts.push(`<text x="${VIZ_ML + trackW / 2}" y="${H - 2}" fill="#444444" font-size="10" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-weight="500">Laps (3-lap rolling avg)</text>`);
 
   // Driver lines
   results.forEach(driver => {
@@ -1990,7 +1993,7 @@ function renderHeatmapChart() {
   for (let l = 1; l <= showThru; l++) {
     if (l === 1 || l === showThru || l % lapStep === 0) {
       const x = LABEL_W + (l - 0.5) * cellW;
-      parts.push(`<text x="${x.toFixed(1)}" y="16" fill="#44447a" font-size="10" text-anchor="middle">${l}</text>`);
+      parts.push(`<text x="${x.toFixed(1)}" y="16" fill="#555555" font-size="10" text-anchor="middle">${l}</text>`);
     }
   }
 
@@ -2015,9 +2018,9 @@ function renderHeatmapChart() {
 
       let fill, extraClass = '';
       if (t == null) {
-        fill = '#0f0f1a';
+        fill = '#111111';
       } else if (meta.type === 'floor') {
-        fill = '#131320'; // pit / filtered — barely visible
+        fill = '#131313'; // pit / filtered — barely visible
       } else if (meta.type === 'incident') {
         extraClass = 'hm-inc';
         fill = meta.delta > 4000 ? '#6e0000' : meta.delta > 2000 ? '#a01828' : '#cc3030';
@@ -2050,19 +2053,19 @@ function renderHeatmapChart() {
 
   // Legend — line 1: scale concept (no swatches, just words)
   const ly1 = PAD_T + n * ROW_H + 13;
-  parts.push(`<text x="${LABEL_W}" y="${ly1}" fill="#32325a" font-size="10" font-style="italic">Brighter cell = closer to personal best · darker = slower</text>`);
+  parts.push(`<text x="${LABEL_W}" y="${ly1}" fill="#444444" font-size="10" font-style="italic">Brighter cell = closer to personal best · darker = slower</text>`);
 
   // Legend — line 2: the 3 special fixed-color cases only
   const ly2 = ly1 + 18;
   const specials = [
     { fill: '#f5c842', label: '★  Race FL' },
     { fill: '#cc3030', label: '💥  Incident (pulses)', cls: 'hm-inc' },
-    { fill: '#131320', stroke: '#252540', label: 'Pit / filtered lap' },
+    { fill: '#131313', stroke: '#252525', label: 'Pit / filtered lap' },
   ];
   let lx = LABEL_W;
   for (const s of specials) {
     parts.push(`<rect${s.cls ? ` class="${s.cls}"` : ''} x="${lx}" y="${ly2 - 9}" width="12" height="12" fill="${s.fill}" stroke="${s.stroke ?? 'none'}" stroke-width="1" rx="2"/>`);
-    parts.push(`<text x="${lx + 16}" y="${ly2 + 1}" fill="#44447a" font-size="10">${escHtml(s.label)}</text>`);
+    parts.push(`<text x="${lx + 16}" y="${ly2 + 1}" fill="#555555" font-size="10">${escHtml(s.label)}</text>`);
     lx += s.label.replace(/[^\x00-\x7F]/g, '  ').length * 5.6 + 24;
   }
 
@@ -2087,7 +2090,7 @@ function renderEventSummary() {
 
   let html = '';
   for (const g of groups) {
-    if (g.label) html += `<div style="font-size:10px;font-weight:600;color:#32325a;text-transform:uppercase;letter-spacing:1px;padding:8px 2px 6px">${escHtml(g.label)}</div>`;
+    if (g.label) html += `<div style="font-size:10px;font-weight:600;color:#444444;text-transform:uppercase;letter-spacing:1px;padding:8px 2px 6px">${escHtml(g.label)}</div>`;
     html += `<div class="event-summary-grid">`;
     for (const heat of g.heats) {
       html += `<div class="event-heat-card" onclick="selectHeat('${escHtml(heat.raceId)}')">
@@ -2307,7 +2310,7 @@ document.getElementById('vizWrap').addEventListener('mousemove', e => {
   if (!dot) { tooltip.style.display = 'none'; return; }
 
   const lap     = parseInt(dot.dataset.lap);
-  const color   = dot.dataset.color || '#dddde8';
+  const color   = dot.dataset.color || '#e0e0e0';
 
   if (lap === 0) {
     // Grid start — show simple label
