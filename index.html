@@ -1063,7 +1063,8 @@ function parseRacePage(html) {
   });
 
   for (const r of results) {
-    r.lapTimes = lapMap[r.driverName] || [];
+    const all = lapMap[r.driverName] || [];
+    r.lapTimes = (r.laps != null && r.laps < all.length) ? all.slice(0, r.laps) : all;
   }
 
   return { className, heatName, results };
