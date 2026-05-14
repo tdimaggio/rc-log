@@ -48,6 +48,36 @@
     #eventUrl  { width: 260px; }
     #raceUrl   { width: 260px; }
     #apiKeyInput { width: 210px; }
+    .sss-wrap { position: relative; display: inline-flex; }
+    #sssBtn { white-space: nowrap; }
+    #sssDropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      min-width: 280px;
+      background: #12121c;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      z-index: 999;
+      overflow: hidden;
+    }
+    #sssDropdown.open { display: block; }
+    .sss-item {
+      padding: 9px 14px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #cccce0;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid #1e1e32;
+    }
+    .sss-item:last-child { border-bottom: none; }
+    .sss-item:hover { background: #1e1e38; color: #fff; }
+    .sss-item .sss-heats { color: #666; font-size: 11px; flex-shrink: 0; }
+    .sss-status { padding: 10px 14px; font-size: 12px; color: #666; font-style: italic; }
 
     .btn {
       background: #1c1c30;
@@ -499,6 +529,10 @@
 <div id="header">
   <input type="text" id="eventUrl" placeholder="Event URL  (view_event&id=…)" />
   <button class="btn" onclick="loadEvent()">Load Race Night</button>
+  <div class="sss-wrap">
+    <button class="btn" id="sssBtn" onclick="toggleSSSDropdown()">🏁 SSS ▾</button>
+    <div id="sssDropdown"></div>
+  </div>
   <span class="sep">|</span>
   <input type="text" id="raceUrl" placeholder="Single Race URL  (view_race_result&id=…)" />
   <button class="btn" onclick="loadSingleRace()">Load Single Race</button>
@@ -651,6 +685,88 @@ function getApiKey() {
       || localStorage.getItem('rc_gemini_key')
       || '';
 }
+
+// ═══════════════════════════════════════════════════════════════
+//  SSS Home Track Dropdown
+// ═══════════════════════════════════════════════════════════════
+let _sssCacheHtml = null;
+let _sssCacheTime = 0;
+const SSS_EVENTS_URL = 'https://ssspeedway.liverc.com/events/';
+const SSS_BASE_URL   = 'https://ssspeedway.liverc.com';
+const SSS_CACHE_MS   = 5 * 60 * 1000;
+const SSS_DAYS_MS    = 7 * 24 * 60 * 60 * 1000;
+
+async function loadSSSEvents() {
+  const drop = document.getElementById('sssDropdown');
+  drop.innerHTML = '<div class="sss-status">Loading…</div>';
+
+  try {
+    if (!_sssCacheHtml || Date.now() - _sssCacheTime > SSS_CACHE_MS) {
+      _sssCacheHtml = await fetchLiverc(SSS_EVENTS_URL);
+      _sssCacheTime = Date.now();
+    }
+
+    const doc = new DOMParser().parseFromString(_sssCacheHtml, 'text/html');
+    const rows = [...doc.querySelectorAll('#events tbody tr')];
+    const cutoff = Date.now() - SSS_DAYS_MS;
+
+    const recent = rows.map(tr => {
+      const tds = tr.querySelectorAll('td');
+      if (tds.length < 3) return null;
+      const a = tds[0].querySelector('a');
+      if (!a) return null;
+      const dateStr = tds[1].querySelector('span.hidden')?.textContent?.trim();
+      if (!dateStr) return null;
+      const date = new Date(dateStr);
+      if (isNaN(date) || date.getTime() < cutoff) return null;
+      return {
+        name:  a.textContent.trim(),
+        url:   SSS_BASE_URL + a.getAttribute('href'),
+        heats: tds[2].textContent.trim(),
+        label: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      };
+    }).filter(Boolean);
+
+    if (!recent.length) {
+      drop.innerHTML = '<div class="sss-status">No events in the last 7 days</div>';
+      return;
+    }
+
+    drop.innerHTML = recent.map(e =>
+      `<div class="sss-item" onclick="pickSSSEvent('${e.url.replace(/'/g,"\\'")}')">
+        <span>${e.label} · ${e.name}</span>
+        <span class="sss-heats">${e.heats} heats</span>
+      </div>`
+    ).join('');
+
+  } catch {
+    drop.innerHTML = '<div class="sss-status">Could not load events</div>';
+  }
+}
+
+function toggleSSSDropdown() {
+  const drop = document.getElementById('sssDropdown');
+  const isOpen = drop.classList.contains('open');
+  drop.classList.toggle('open', !isOpen);
+  if (!isOpen) loadSSSEvents();
+}
+
+function pickSSSEvent(url) {
+  document.getElementById('eventUrl').value = url;
+  document.getElementById('sssDropdown').classList.remove('open');
+  loadEvent();
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.sss-wrap')) {
+    document.getElementById('sssDropdown').classList.remove('open');
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('sssDropdown').classList.remove('open');
+  }
+});
 
 function msToStr(ms) {
   if (ms == null || isNaN(ms)) return '—';
