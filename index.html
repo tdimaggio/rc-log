@@ -1158,16 +1158,25 @@ function computePositionsByLap(results) {
   grid.forEach((r, i) => { posMap[r.driverName] = [i + 1]; });
 
   for (let lap = 1; lap <= maxLap; lap++) {
-    const ranked = results
-      .map(r => ({
-        name: r.driverName,
-        cum: r.lapTimes.length >= lap
-          ? r.lapTimes.slice(0, lap).reduce((a, b) => a + b, 0)
-          : Infinity,
-        lapsComplete: Math.min(r.lapTimes.length, lap),
-      }))
-      // Primary: more laps = better. Secondary: lower cumulative time = better.
-      .sort((a, b) => b.lapsComplete - a.lapsComplete || a.cum - b.cum);
+    let ranked;
+    if (lap === maxLap) {
+      // Final lap: trust the official results-table finishing order.
+      // Transponder data can disagree (extra pings, intermediate cum-time crossovers).
+      ranked = [...results]
+        .sort((a, b) => a.position - b.position)
+        .map(r => ({ name: r.driverName }));
+    } else {
+      ranked = results
+        .map(r => ({
+          name: r.driverName,
+          cum: r.lapTimes.length >= lap
+            ? r.lapTimes.slice(0, lap).reduce((a, b) => a + b, 0)
+            : Infinity,
+          lapsComplete: Math.min(r.lapTimes.length, lap),
+        }))
+        // Primary: more laps = better. Secondary: lower cumulative time = better.
+        .sort((a, b) => b.lapsComplete - a.lapsComplete || a.cum - b.cum);
+    }
 
     ranked.forEach((d, i) => { posMap[d.name].push(i + 1); });
   }
