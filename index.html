@@ -1481,7 +1481,7 @@ function renderConsistency() {
 //  Spicy Analysis  (Claude API)
 // ═══════════════════════════════════════════════════════════════
 async function generateSpicyAnalysis() {
-  const area = document.getElementById('spicyArea');
+  const area = document.getElementById(isMobile() ? 'mobile-analysis' : 'spicyArea');
   const key  = getApiKey();
 
   if (!key || !currentHeat) {
@@ -1508,7 +1508,22 @@ async function generateSpicyAnalysis() {
   area.innerHTML = `<span class="loading">Generating commentary…</span>`;
 
   try {
-    const prompt = `You are a savage, funny pit-lane commentator for local RC car club racing. Roast these results with real personality. Rules:
+    const prompt = isMobile()
+      ? `You are a concise race analyst covering local RC car club racing. Give a focused breakdown of this race.
+- Lead with who won and by how much
+- Call out the fastest lap and who set it
+- Highlight any key battles or position changes from the grid
+- Name any drivers with incidents and the count
+- Note pace or consistency standouts
+- 4–6 sentences, facts first, no filler.
+
+Race: ${className}${heatName ? ' — ' + heatName : ''}
+Fastest lap: ${flDriver.driverName} — ${msToStr(flDriver.fastestLapMs)}
+Winner's total time: ${msToStr(winner.totalTimeMs)}
+
+Results:
+${summary}`
+      : `You are a savage, funny pit-lane commentator for local RC car club racing. Roast these results with real personality. Rules:
 - Quote actual lap times and gaps (e.g. "a 9.944s best lap", "+12 seconds back")
 - Name every driver — no "a driver" or "one competitor"
 - If someone had incidents, name them and the count — make it hurt
