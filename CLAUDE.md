@@ -1,35 +1,49 @@
-# CLAUDE.md — RC Race Replay
+# CLAUDE.md — RC Race Replay (sssdash)
 
 Context for AI-assisted development of this project.
 
 ## What this is
 
-A single-file HTML app (`rc-log.html`) that:
+A single-file HTML app (`index.html`) that:
 - Fetches RC car race data from liverc.com via a local CORS proxy
 - Replays races lap-by-lap with animated SVG charts (5 chart modes)
 - Provides a live timing table view alongside the charts
 - Detects "incidents" (laps significantly slower than the driver's personal average)
 - Calls the Gemini API for "Spicy Analysis" AI commentary
+- Has a full mobile layout (≤768px) — SSS dropdown only, stacked charts, auto AI summary
 
-No build step. Everything is in `rc-log.html`. The only companion file needed at runtime is `proxy.mjs`.
+No build step. Everything is in `index.html`. The only companion file needed at runtime is `proxy.mjs`.
 
-## How to run
+## Deployment
 
+**Cloudflare Workers:** `https://sssdash.tdimaggio.workers.dev`  
+Push to `main` → auto-deploys via `wrangler.toml` + `src/index.js`.
+
+**Local dev:**
 ```bash
 node proxy.mjs          # start CORS proxy on port 3001 — keep open
 npx serve -p 4321 .     # serve on localhost:4321 (matches .claude/launch.json for preview)
-# then open http://localhost:4321/rc-log.html
+# then open http://localhost:4321
 ```
 
-## Architecture: rc-log.html (~2400 lines)
+## Recent changes (2026-05-13)
+
+- Renamed `rc-log.html` → `index.html` (serves at root URL)
+- Motorsport theme: carbon + red palette, replaced all blue/purple tokens; Barlow font (non-condensed); all font sizes reduced 1px
+- SSS button moved first in header, renamed to "🏁 Smallscale Speedway ▾"
+- Full mobile layout implemented (see Mobile Layout section below)
+- All 5 SVG charts now have `viewBox="0 0 ${W} ${H}"` for CSS scaling
+- `VIZ_MR` changed from `const` to `let` so mobile renders can temporarily reduce it
+
+## Architecture: index.html (~2500 lines)
 
 The file is structured as: `<style>` block → `<body>` HTML → `<script>` block.
 
-### Layout (3 columns)
+### Desktop layout (3 columns)
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│  #header  (URL inputs, Play/Speed controls, API key) │
+│  #header  (SSS btn, URL inputs, Play/Speed, API key) │
 ├────────────┬─────────────────────────┬───────────────┤
 │ #sidebar   │  #main                  │ #sidebar-right│
 │ (170px)    │  (flex-grow)            │ (225px)       │
@@ -40,6 +54,27 @@ The file is structured as: `<style>` block → `<body>` HTML → `<script>` bloc
 ```
 
 `body { min-width: 820px }` prevents sidebars from collapsing in narrow viewports.
+
+### Mobile layout (≤768px, body.mobile-active)
+
+```
+┌─────────────────────────┐
+│  🏁 Smallscale Speedway │  ← SSS button only, full width
+├─────────────────────────┤
+│  #mobile-heat-list      │  ← heat list (Mains / Qualifiers), disappears after race loads
+├─────────────────────────┤
+│  🔥 Race Analysis       │  ← AI summary auto-generates on race load (facts-first prompt)
+├─────────────────────────┤
+│  Position / Lap / Gap   │  ← all 5 charts stacked full-width, no animation
+│  Pace / Heatmap         │
+├─────────────────────────┤
+│  Driver Cards           │  ← compact rows from renderStats()
+├─────────────────────────┤
+│  🖥 Desktop Version     │  ← sets localStorage forceDesktop=1, reloads
+└─────────────────────────┘
+```
+
+`#switchModeBtn` in header (hidden by default) — shown to small-screen desktop users (forceDesktop=1) to return to mobile.
 
 ### Key global state
 
@@ -56,17 +91,14 @@ highlightedDriver // driver name string, or null
 
 ### Data flow
 
-1. User pastes URL → `loadEventUrl()` or `loadRaceUrl()` (auto-detected by URL shape)
-2. `fetchLiverc(url)` — tries `localhost:3001` proxy first, then allorigins.win, then corsproxy.io
-3. `parseEventPage(html)` → extracts heat list from `<a href="...view_race_result...">` links
-4. `parseRacePage(html)` → results table + embedded JS `racerLaps[ID] = { laps: [{time: '10.185'}] }`
-   - Also parses `consistencyPct` from column 12 of the results table
-5. `computeIncidents(results)` — adds `.lapMeta`, `.incidentCount`, `.fastestLapMs`, `.avgLapMs`
-6. `computePositionsByLap(results)` → `{ posMap, maxLap }` cached on `currentHeat._posMap`
-7. `computeRaceData(results, maxLap)` → `{ driverCumAt, gapAt }` — shared by Gap/Pace/Heatmap charts
-8. `renderVisualization()` — dispatches to chart-specific render function based on `chartMode`
-9. `renderStats()` — compact driver rows; hover triggers `showDriverPopup()`
-10. `renderConsistency()` — ranked consistency bar chart in `#fastestLapsArea`
+1. User clicks SSS → `pickSSSEvent()` → `loadEvent(url)` → `loadEventUrl()`
+2. On mobile: `renderMobileHeatList()` shows tappable heat items in `#mobile-heat-list`
+3. User taps heat → `selectHeat(url)` → `loadRaceUrl()`
+4. `fetchLiverc(url)` — tries `localhost:3001` proxy first, then allorigins.win, then corsproxy.io
+5. `parseRacePage(html)` → results table + embedded JS `racerLaps[ID] = { laps: [{time: '10.185'}] }`
+6. `computeIncidents(results)` → `computePositionsByLap(results)` → `computeRaceData(results, maxLap)`
+7. `renderVisualization()` + `renderStats()` + `renderConsistency()`
+8. On mobile: `renderMobileCharts()` + copy statsArea to `#mobile-drivers` + `generateSpicyAnalysis()`
 
 ### CORS proxy cascade (fetchLiverc)
 
@@ -90,18 +122,38 @@ for `file://` origin and for the `/env` endpoint that auto-loads the Gemini key.
 | `'heatmap'` | `renderHeatmapChart()` | Grid: rows=drivers, cols=laps; color = lap quality |
 
 SVG charts are rebuilt from scratch on every animation tick. `leaderLap` controls draw depth.
+All 5 charts have `viewBox="0 0 ${W} ${H}"` so CSS `width:100%; height:auto` scales them correctly.
 
 SVG margin constants:
 ```js
-VIZ_ML = 30   // left  (position/lap labels)
-VIZ_MR = 140  // right (driver name labels)
-VIZ_MT = 16   // top
-VIZ_MB = 30   // bottom (lap number labels)
+let VIZ_MR = 140  // right (driver name labels) — temporarily set to 80 during mobile renders
+const VIZ_ML = 30   // left  (position/lap labels)
+const VIZ_MT = 16   // top
+const VIZ_MB = 30   // bottom (lap number labels)
 ```
 
-Heatmap uses its own `LABEL_W` (dynamic, computed from longest driver name: `max(110, min(185, min(longestName, 18) * 8 + 32))`).
+Heatmap uses its own `LABEL_W` (dynamic: `max(110, min(185, min(longestName, 18) * 8 + 32))`), not VIZ_MR.
 
-### Driver sidebar (right panel)
+### Mobile detection and rendering
+
+```js
+function isMobile() {
+  return window.innerWidth <= 768 && localStorage.getItem('forceDesktop') !== '1';
+}
+function forceDesktop()      { localStorage.setItem('forceDesktop', '1'); location.reload(); }
+function clearForceDesktop() { localStorage.removeItem('forceDesktop'); location.reload(); }
+```
+
+`renderMobileCharts()` off-screen render trick — `getBoundingClientRect()` returns 0 on hidden elements,
+so charts would render at 700px fallback. Fix: temporarily un-hide `#vizWrap` off-screen at actual mobile
+width, render all 5 modes, copy SVG innerHTML into `#mobile-chart-*` containers, restore.
+Also temporarily sets `VIZ_MR = 80` (vs 140) so chart data gets more horizontal space on phone screens.
+
+`renderMobileHeatList()` groups heats into Mains / Qualifiers sections, renders tappable items
+into `#mobile-heat-list`. Items call `selectHeat(url)` → `loadRaceUrl()`. Heat list div is cleared
+after race loads so it doesn't persist above the race content.
+
+### Driver sidebar (right panel, desktop only)
 
 Always shows compact `P# · Name + sparkline` rows. No expand/collapse toggle.
 
@@ -111,8 +163,6 @@ Hovering a row calls `showDriverPopup(el, driverName, colorIdx)` which:
 - Positions the popup to the left of the sidebar using `getBoundingClientRect()`
 
 `hideDriverPopup()` is called on `mouseleave`.
-
-Below the driver rows: `#sparklineHint` (small italic label) + `#fastestLapsArea` (consistency board).
 
 ### Animation
 
@@ -130,7 +180,9 @@ View/chart mode tabs (`#viewToggle`, `#chartTabs`) are inside `#raceControls` (s
 Calls **Gemini 2.5 Flash** API directly from the browser:
 - Endpoint: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`
 - API key: read from `localStorage` key `rc_gemini_key`; also auto-loaded from proxy `/env` on startup
-- Prompt includes race name, driver standings, incident counts, fastest laps
+- Output target: `#mobile-analysis` on mobile, `#spicyArea` on desktop
+- **Desktop prompt:** snarky pit-lane commentator — roast results with personality
+- **Mobile prompt:** facts-first race analyst — winner, fastest lap, battles, incidents, pace
 
 ### Incident algorithm (computeIncidents)
 
@@ -201,6 +253,11 @@ Event 504950 has 21 heats. Race 6755593 has 4 drivers (MATT STEFANS, DYLAN HOFFM
 | `setViewMode(mode)` | Switch chart/table, show/hide #vizWrap/#tableWrap |
 | `toggleDriverHighlight(name)` | Highlight driver across all chart elements |
 | `generateSpicyAnalysis()` | Call Gemini API, render commentary |
+| `isMobile()` | Returns true if ≤768px and forceDesktop not set |
+| `forceDesktop()` | Sets localStorage flag, reloads as desktop |
+| `clearForceDesktop()` | Clears flag, reloads as mobile |
+| `renderMobileCharts()` | Render all 5 charts into #mobile-chart-* containers |
+| `renderMobileHeatList()` | Render tappable heat list into #mobile-heat-list |
 | `msToStr(ms)` | Format milliseconds as `m:ss.xxx` |
 
 ## Known gotchas
@@ -209,6 +266,9 @@ Event 504950 has 21 heats. Race 6755593 has 4 drivers (MATT STEFANS, DYLAN HOFFM
 - `proxy.mjs` binds to `127.0.0.1` — not reachable from other machines; hosted users fall through to public proxies automatically
 - Port 3001 EADDRINUSE: `lsof -ti:3001 | xargs kill -9`
 - `qualPos` may be null if the race page has no qualifying data — drivers default to position 99 (sorted last at lap 0)
-- ALL CAPS Inter font at 11px ≈ 8px/char (wider than it looks) — heatmap LABEL_W accounts for this
+- Heatmap LABEL_W accounts for ALL CAPS Barlow font at 11px ≈ 8px/char
 - The `.claude/launch.json` configures Claude Code's preview server (`npx serve -p 4321 .`)
 - `applyHighlight()` targets both `[data-drivername]` (SVG charts) and `[data-driver]` (heatmap) attributes
+- `getBoundingClientRect()` returns 0 on `display:none` elements — mobile chart render must temporarily un-hide `#vizWrap` off-screen before calling render functions
+- `VIZ_MR` is `let` (not `const`) so `renderMobileCharts()` can temporarily set it to 80 and restore after
+- Gemini API key is stored in `localStorage` key `rc_gemini_key` and also auto-loaded from `/env` on the proxy; free tier so no billing risk if key is exposed
