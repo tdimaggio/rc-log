@@ -2490,9 +2490,33 @@ document.addEventListener('keydown', e => {
 })();
 
 // ═══════════════════════════════════════════════════════════════
+//  Mobile layout
+// ═══════════════════════════════════════════════════════════════
+function isMobile() {
+  return window.innerWidth <= 768 && localStorage.getItem('forceDesktop') !== '1';
+}
+
+function forceDesktop() {
+  localStorage.setItem('forceDesktop', '1');
+  location.reload();
+}
+
+function clearForceDesktop() {
+  localStorage.removeItem('forceDesktop');
+  location.reload();
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  Startup — restore from URL hash, then localStorage, load env key
 // ═══════════════════════════════════════════════════════════════
 readUrlHash();
+if (isMobile()) {
+  document.documentElement.classList.add('mobile-active');
+  document.body.classList.add('mobile-active');
+}
+if (window.innerWidth <= 768 && !isMobile()) {
+  document.getElementById('switchModeBtn').style.display = '';
+}
 if (!document.getElementById('eventUrl').value) {
   const saved = localStorage.getItem('rc_last_event_url');
   if (saved) document.getElementById('eventUrl').value = saved;
