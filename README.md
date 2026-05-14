@@ -1,8 +1,10 @@
 # RC Race Replay
 
-A single-file browser app that fetches RC car race data from [liverc.com](https://liverc.com), replays races lap-by-lap with animated charts, detects incidents, and generates AI race commentary.
+A browser app that fetches RC car race data from [liverc.com](https://liverc.com), replays races lap-by-lap with animated charts, detects incidents, and generates AI race commentary.
 
-No build step. No npm install. Just `rc-log.html` + a tiny CORS proxy (`proxy.mjs`).
+**Live:** [sssdash.tdimaggio.workers.dev](https://sssdash.tdimaggio.workers.dev)
+
+No build step. No npm install. Single HTML file (`index.html`) + optional local CORS proxy (`proxy.mjs` for dev).
 
 ![screenshot](Screenshot%202026-05-13%20163826.png)
 
@@ -17,25 +19,47 @@ No build step. No npm install. Just `rc-log.html` + a tiny CORS proxy (`proxy.mj
 | **Lap Times** | Every lap plotted — personal bests marked with ★, incidents in red |
 | **Gap** | Gap to leader in seconds — leader stays flat at 0 |
 | **Pace** | 3-lap rolling average — shows who was on a charge and who faded |
-| **Heat Map** | Lap quality grid — cells color-coded from personal best (solid) to incident (pulsing red 💥) |
+| **Heat Map** | Lap quality grid — cells color-coded from personal best (solid) to incident (pulsing red) |
 
 ### Table view
-Switch from charts to a **live timing table** — every driver × every lap, with cell colors for fastest lap of race (green), personal bests (yellow), and incidents (red). Consistency score shown in the driver column (🎯 for locked-in drivers, 🌪️ for chaos).
+Switch from charts to a **live timing table** — every driver × every lap, with cell colors for fastest lap of race (green), personal bests (yellow), and incidents (red). Consistency score shown in the driver column.
+
+### SSS Home Track dropdown
+"🏁 Smallscale Speedway ▾" button in the header loads the last 7 days of events from ssspeedway.liverc.com (5-min cache). Click any event card to load it instantly — great for quick replay during a race day.
 
 ### Driver sidebar
 - Compact `P# · Name + sparkline` rows for every driver
 - **Hover any row** for a floating popup with full stats: grid→finish, best/avg lap, consistency %, incidents, position changes
 - **Consistency board** below the driver list — horizontal bar chart ranked by consistency %, color-coded green/yellow/red. Falls back to coefficient-of-variation if liverc doesn't report it.
 
-### Event summary
-Load an event URL and see a clickable card grid of all heats — click any card to load that race instantly.
+### Mobile layout
+Responsive design for screens ≤768px:
+- SSS dropdown and all controls in header
+- AI summary generates at top of page on completion
+- All 5 charts stacked full-width (no animation — renders instantly at race finish)
+- Driver cards below charts
+- "🖥 Desktop Version" toggle button at bottom (uses localStorage)
 
 ### Other
 - **Incident detection** — any lap 2 s+ above the driver's top-5 average is flagged
-- **Spicy Analysis** — AI commentary via Gemini (API key required), roasts the results with actual lap times and driver names
+- **Spicy Analysis** — AI commentary via Gemini (API key required, masked input), roasts the results with actual lap times and driver names
 - Scrubber bar + keyboard controls (Space = play/pause, ← → = step laps)
 - Resizable panels (drag the dividers)
 - Shareable URL hash — paste a liverc URL into the browser bar and share it
+- **Theme** — carbon + red color scheme, Barlow font
+
+---
+
+## Live deployment
+
+The app is deployed on **Cloudflare Workers** at [sssdash.tdimaggio.workers.dev](https://sssdash.tdimaggio.workers.dev).
+
+The Workers runtime (`src/index.js`) includes:
+- Built-in CORS proxy at `/proxy`
+- `/env` endpoint for auto-loading Gemini key from CF secrets
+- Static asset serving
+
+No server-side setup required for end users.
 
 ---
 
@@ -47,28 +71,50 @@ node proxy.mjs
 
 # Terminal 2 — static file server
 npx serve -p 4321 .
-# then open http://localhost:4321/rc-log.html
+# then open http://localhost:4321
 ```
 
-Or just open `rc-log.html` directly from the filesystem (`file://...`) — the proxy is still needed.
+When served over HTTP (not `file://`), the app automatically falls back to public proxies if the local proxy is unavailable.
 
-**API key** — paste your Gemini API key into the key field in the header. Saved in `localStorage`. You can also put `GEMINI_KEY=...` in a `.env` file and the proxy will auto-load it into the app.
+**API key** — paste your Gemini API key into the (masked) key field in the header. Saved in `localStorage`. You can also put `GEMINI_KEY=...` in a `.env` file and `proxy.mjs` will auto-load it via the `/env` endpoint.
 
 ---
 
-## Deploying on a Linux server
+## Deploying on Cloudflare Workers (recommended)
+
+The app is built for **Cloudflare Workers**. See `wrangler.toml` for configuration.
+
+### Prerequisites
+- Cloudflare account with Workers enabled
+- `wrangler` CLI: `npm install -g @cloudflare/wrangler`
+
+### Deploy
+```bash
+# Set Gemini API key as a secret (one-time)
+wrangler secret put GEMINI_KEY
+# paste your key
+
+# Deploy
+wrangler deploy
+```
+
+The Workers runtime handles CORS proxying and serving all static assets — no separate proxy needed.
+
+---
+
+## Alternative: Linux server (docker, pm2, etc.)
 
 ### Prerequisites
 
 - **Node.js 18+** (for native ESM support — `node proxy.mjs` uses `import`)
-- No npm packages required
-- A static file server: `npx serve`, nginx, caddy, or even `python3 -m http.server`
+- A static file server: `npx serve`, nginx, caddy, or `python3 -m http.server`
 
 ### Setup
 
 ```bash
-git clone https://github.com/tdimaggio/rc-log
-cd rc-log
+git clone https://github.com/tdimaggio/rc-html
+cd rc-html
+
 # Optional: create .env to auto-load Gemini key
 echo "GEMINI_KEY=your_key_here" > .env
 ```
@@ -82,21 +128,17 @@ node proxy.mjs
 
 # Terminal / process 2 — static HTML server
 npx serve -p 4321 .
-# App is at http://<server-ip>:4321/rc-log.html
+# App is at http://<server-ip>:4321
 ```
 
-### Notes on proxy behavior when hosted
+### Notes on proxy behavior
 
-The proxy (`proxy.mjs`) **binds to `127.0.0.1`** — it is not reachable from other machines by default.
+The proxy (`proxy.mjs`) **binds to `127.0.0.1`** — not reachable from other machines. When served over HTTP, the app automatically falls back to:
+1. `http://localhost:3001` — local proxy (dev only)
+2. `https://api.allorigins.win` — public proxy fallback
+3. `https://corsproxy.io` — second fallback
 
-When the HTML is served over HTTP (not `file://`), the app automatically waterfalls through three CORS proxy options:
-1. `http://localhost:3001` — works when proxy is running **on the same machine as the browser** (local dev)
-2. `https://api.allorigins.win` — public proxy, works fine from a hosted origin
-3. `https://corsproxy.io` — second public fallback
-
-**Bottom line for Tailscale / network hosting:** users browsing from another machine will silently fall through to `allorigins.win` — everything works. The local proxy is only needed when opening `rc-log.html` directly from the filesystem.
-
-The proxy's `/env` endpoint (which serves the Gemini key from `.env`) is only accessible from localhost. For hosted users, the Gemini key must be entered manually in the header — it's saved in `localStorage` and persists across sessions.
+Users on other machines will silently use the public proxies — everything works.
 
 ### Keeping it running (pm2)
 
@@ -114,7 +156,7 @@ Check status: `pm2 list` / `pm2 logs rc-proxy`
 
 ### Firewall / Tailscale
 
-Only expose the static file server port (e.g. 4321) via Tailscale ACLs. Port 3001 (the proxy) should stay localhost-only.
+Only expose the static file server port (e.g. 4321) via Tailscale ACLs. Port 3001 (the proxy) stays localhost-only.
 
 ---
 
@@ -122,28 +164,37 @@ Only expose the static file server port (e.g. 4321) via Tailscale ACLs. Port 300
 
 | File | Purpose |
 |------|---------|
-| `rc-log.html` | The entire app — HTML, CSS, and JS in one file (~2400 lines) |
-| `proxy.mjs` | Tiny Node.js CORS proxy (port 3001), also serves `.env` Gemini key to the app |
-| `.env` | *(gitignored)* `GEMINI_KEY=...` |
+| `index.html` | The entire app — HTML, CSS, and JS in one file (~2700 lines) |
+| `src/index.js` | Cloudflare Worker entry point: CORS proxy, `/env` endpoint, static serving |
+| `wrangler.toml` | Cloudflare Workers config |
+| `proxy.mjs` | Local Node.js CORS proxy (port 3001) for dev, also serves `.env` Gemini key |
+| `.env` | *(gitignored)* `GEMINI_KEY=...` (for local dev only) |
 | `CLAUDE.md` | Architecture notes for AI-assisted development |
 
 ---
 
 ## Architecture (quick reference)
 
-The file is structured as: `<style>` → `<body>` → `<script>`. No framework, no bundler.
+`index.html` is structured as: `<style>` → `<body>` → `<script>`. No framework, no bundler.
 
 **Layout (3 columns):**
 ```
-┌──────────────────────────────────────────────────────┐
-│  #header  (URL inputs, Play/Speed, API key)          │
-├────────────┬─────────────────────────┬───────────────┤
-│ #sidebar   │  #main                  │ #sidebar-right│
-│ (170px)    │  #vizWrap (charts/SVG)  │ (225px)       │
-│ heat list  │  #tableWrap (table)     │ driver rows   │
-│            │  #raceName              │ consistency   │
-└────────────┴─────────────────────────┴───────────────┘
+┌──────────────────────────────────────────────────────────┐
+│ #header (SSS dropdown, URL inputs, Play/Speed, API key) │
+├────────────┬─────────────────────────┬───────────────────┤
+│ #sidebar   │  #main                  │ #sidebar-right    │
+│ (170px)    │  #vizWrap (charts/SVG)  │ (225px)           │
+│ heat list  │  #tableWrap (table)     │ driver rows       │
+│            │  #raceName              │ consistency board │
+└────────────┴─────────────────────────┴───────────────────┘
 ```
+
+**Mobile layout (≤768px):**
+- All controls collapse into header (SSS dropdown, race URL input)
+- Charts and tables stack full-width below header
+- Driver sidebar below race data
+- No animation on mobile (renders at completion)
+- "🖥 Desktop Version" toggle at bottom
 
 **Key state variables:**
 ```js
