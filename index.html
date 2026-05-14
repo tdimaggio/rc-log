@@ -589,10 +589,18 @@
     }
     .mobile-chart-wrap { width: 100%; }
     .mobile-chart-wrap svg { width: 100%; height: auto; }
-    body.mobile-active #mobile-drivers .compact-driver-row {
-      padding: 8px 4px;
-      border-bottom: 1px solid #1a1a1a;
+    body.mobile-active #mobile-drivers { display: flex; flex-direction: column; gap: 10px; }
+    .mobile-driver-card {
+      background: #0a0a0a;
+      border: 1px solid #222222;
+      border-left: 3px solid var(--card-color, #cc0000);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
     }
+    .mobile-driver-card .dp-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .mobile-driver-card .dp-sparkline { margin-bottom: 10px; border-bottom: 1px solid #222222; padding-bottom: 10px; }
+    .mobile-driver-card .stat-row { margin-bottom: 6px; }
     #mobile-desktop-btn {
       width: 100%;
       margin-top: 24px;
@@ -1471,6 +1479,34 @@ function showDriverPopup(el, driverName, colorIdx) {
 
 function hideDriverPopup() {
   document.getElementById('driver-popup').style.display = 'none';
+}
+
+function renderMobileDrivers() {
+  const area = document.getElementById('mobile-drivers');
+  if (!area) return;
+  if (!currentHeat) { area.innerHTML = ''; return; }
+  const sorted = [...currentHeat.results].sort((a, b) => a.position - b.position);
+  area.innerHTML = sorted.map((driver, i) => {
+    const color = DRIVER_COLORS[i % DRIVER_COLORS.length];
+    const qual  = driver.qualPos != null ? `Q${driver.qualPos}` : '?';
+    const net   = driver.qualPos != null ? driver.qualPos - driver.position : null;
+    const posChange = net != null ? `+${Math.max(0,net)} / -${Math.max(0,-net)}` : '—';
+    const consStr = driver.consistencyPct != null ? driver.consistencyPct.toFixed(1) + '%' : '—';
+    const consColor = driver.consistencyPct != null
+      ? (driver.consistencyPct >= 90 ? '#2ecc71' : driver.consistencyPct >= 75 ? '#f5c842' : '#e53935')
+      : '#666666';
+    const incColor = driver.incidentCount ? '#e53935' : '#2ecc71';
+    return `<div class="mobile-driver-card" style="--card-color:${color}">
+      <div class="dp-title" style="color:${color}">P${driver.position} · ${escHtml(driver.driverName)}</div>
+      <div class="dp-sparkline">${buildSparkline(driver, color)}</div>
+      <div class="stat-row"><span>Grid → Finish</span><span class="v">${qual} → P${driver.position}</span></div>
+      <div class="stat-row"><span>Best lap</span><span class="v">${msToStr(driver.fastestLapMs)}</span></div>
+      <div class="stat-row"><span>Avg lap</span><span class="v">${msToStr(driver.avgLapMs)}</span></div>
+      <div class="stat-row"><span>Consistency</span><span class="v" style="color:${consColor}">${consStr}</span></div>
+      <div class="stat-row"><span>Incidents</span><span class="v" style="color:${incColor}">${driver.incidentCount} (${driver.laps ?? '?'} laps)</span></div>
+      <div class="stat-row"><span>Pos changes</span><span class="v">${posChange}</span></div>
+    </div>`;
+  }).join('');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2475,8 +2511,7 @@ async function loadRaceUrl(url) {
     if (isMobile()) {
       document.getElementById('mobile-heat-list').innerHTML = '';
       renderMobileCharts();
-      document.getElementById('mobile-drivers').innerHTML =
-        document.getElementById('statsArea').innerHTML;
+      renderMobileDrivers();
     }
     renderHeatList();       // update active highlight
     generateSpicyAnalysis();
