@@ -1226,7 +1226,7 @@ function renderVisualization() {
   const colorOf = {};
   sorted.forEach((r, i) => { colorOf[r.driverName] = DRIVER_COLORS[i % DRIVER_COLORS.length]; });
 
-  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">`];
+  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`];
 
   // ── Background grid ──────────────────────────────────────────
   // Horizontal position lines
@@ -1414,6 +1414,14 @@ function renderMobileCharts() {
   if (!currentHeat) return;
   const modes = ['position', 'laptime', 'gap', 'pace', 'heatmap'];
   const saved = chartMode;
+
+  // Render charts at actual mobile width by temporarily un-hiding vizWrap off-screen.
+  // Without this, getBoundingClientRect() returns 0 and charts render at 700px fallback,
+  // which then scales down to unreadable text on phones.
+  const vizWrap = document.getElementById('vizWrap');
+  const mobileW = (document.getElementById('mobileView').offsetWidth || window.innerWidth) - 24;
+  vizWrap.style.cssText = `display:block !important;position:absolute;visibility:hidden;width:${mobileW}px;left:-9999px;top:0`;
+
   modes.forEach(mode => {
     chartMode = mode;
     renderVisualization();
@@ -1421,6 +1429,7 @@ function renderMobileCharts() {
     if (dest) dest.innerHTML = document.getElementById('vizArea').innerHTML;
   });
   chartMode = saved;
+  vizWrap.style.cssText = '';
 }
 
 function showDriverPopup(el, driverName, colorIdx) {
@@ -1767,7 +1776,7 @@ function renderLapTimeChart() {
   sorted.forEach((r, i) => { colorOf[r.driverName] = DRIVER_COLORS[i % DRIVER_COLORS.length]; });
 
   const showThru = Math.min(leaderLap, maxLap);
-  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">`];
+  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`];
 
   // Y-axis grid lines (nice 500ms intervals)
   const step = Math.ceil((maxMs - minMs) / 5 / 500) * 500 || 1000;
@@ -1873,7 +1882,7 @@ function renderGapChart() {
   const colorOf = {};
   sorted.forEach((r, i) => { colorOf[r.driverName] = DRIVER_COLORS[i % DRIVER_COLORS.length]; });
 
-  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">`];
+  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`];
 
   // Y-axis (gap in seconds)
   const gapStepMs = Math.max(1000, Math.ceil((maxGapMs / 1000) / 5) * 1000);
@@ -1988,7 +1997,7 @@ function renderPaceChart() {
   const colorOf = {};
   sorted.forEach((r, i) => { colorOf[r.driverName] = DRIVER_COLORS[i % DRIVER_COLORS.length]; });
 
-  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">`];
+  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`];
 
   // Y-axis
   const step = Math.ceil((maxMs - minMs) / 5 / 500) * 500 || 1000;
@@ -2158,7 +2167,7 @@ function renderHeatmapChart() {
   const cellW   = Math.min(30, Math.max(8, Math.floor((W - LABEL_W - PAD_R) / Math.max(showThru, 1))));
   const H       = PAD_T + n * ROW_H + PAD_B;
 
-  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" style="font-family:Inter,system-ui,sans-serif">`];
+  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="font-family:Inter,system-ui,sans-serif">`];
 
   // Lap number labels along the top
   const lapStep = showThru <= 15 ? 2 : showThru <= 35 ? 5 : 10;
