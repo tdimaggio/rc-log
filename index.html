@@ -599,6 +599,25 @@
       padding: 12px;
       font-size: 13px;
     }
+    #mobile-heat-list { display: none; }
+    body.mobile-active #mobile-heat-list { display: block; margin-bottom: 4px; }
+    .mobile-heat-item {
+      padding: 11px 14px;
+      cursor: pointer;
+      font-size: 15px;
+      color: #e0e0e0;
+      border-bottom: 1px solid #1a1a1a;
+      background: #111111;
+    }
+    .mobile-heat-item:active { background: #1c1c1c; }
+    .mobile-heat-section {
+      font-size: 10px;
+      font-weight: 600;
+      color: #555555;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 10px 14px 6px;
+    }
   </style>
 </head>
 <body>
@@ -711,6 +730,7 @@
 
 <!-- ── Mobile View ────────────────────────────────────────────────── -->
 <div id="mobileView">
+  <div id="mobile-heat-list"></div>
   <div class="mobile-section-label">🔥 Race Analysis</div>
   <div id="mobile-analysis"><span style="color:#555555">Load a race using the button above.</span></div>
 
@@ -1367,6 +1387,27 @@ function renderStats() {
       ${spark}
     </div>`;
   }).join('');
+}
+
+function renderMobileHeatList() {
+  const el = document.getElementById('mobile-heat-list');
+  if (!el) return;
+  if (!currentEvent || !currentEvent.heats.length) { el.innerHTML = ''; return; }
+  const mains = currentEvent.heats.filter(h => /main|final/i.test(h.label));
+  const quals  = currentEvent.heats.filter(h => !/main|final/i.test(h.label));
+  let html = `<div class="mobile-section-label" style="padding-top:8px">${escHtml(currentEvent.eventName)}</div>`;
+  if (mains.length) {
+    html += `<div class="mobile-heat-section">Main Events</div>`;
+    html += mains.map(h => `<div class="mobile-heat-item" onclick="selectHeat('${h.raceId}')">${escHtml(h.label)}</div>`).join('');
+  }
+  if (quals.length) {
+    html += `<div class="mobile-heat-section">Qualifiers / Heats</div>`;
+    html += quals.map(h => `<div class="mobile-heat-item" onclick="selectHeat('${h.raceId}')">${escHtml(h.label)}</div>`).join('');
+  }
+  if (!mains.length && !quals.length) {
+    html += currentEvent.heats.map(h => `<div class="mobile-heat-item" onclick="selectHeat('${h.raceId}')">${escHtml(h.label)}</div>`).join('');
+  }
+  el.innerHTML = html;
 }
 
 function renderMobileCharts() {
@@ -2307,6 +2348,7 @@ async function loadEvent() {
 
     renderHeatList();
     renderEventSummary();
+    if (isMobile()) renderMobileHeatList();
     pushUrlHash();
   } catch (err) {
     document.getElementById('heatList').innerHTML =
@@ -2403,6 +2445,7 @@ async function loadRaceUrl(url) {
     renderStats();
     renderConsistency();
     if (isMobile()) {
+      document.getElementById('mobile-heat-list').innerHTML = '';
       renderMobileCharts();
       document.getElementById('mobile-drivers').innerHTML =
         document.getElementById('statsArea').innerHTML;
