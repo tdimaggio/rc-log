@@ -524,6 +524,81 @@
       display: inline-block; background: #1a1a1a; border-radius: 4px;
       padding: 2px 6px; font-size: 11px; color: #555555; margin-right: 4px;
     }
+
+    /* ── Mobile Layout ───────────────────────────────────────────── */
+    #mobileView { display: none; }
+
+    html.mobile-active { height: auto; overflow-y: auto; }
+    body.mobile-active {
+      min-width: unset;
+      overflow-y: auto;
+      overflow-x: hidden;
+      height: auto;
+    }
+
+    /* Header */
+    body.mobile-active #header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+    }
+    body.mobile-active #header .sss-wrap,
+    body.mobile-active #header #sssBtn { width: 100%; }
+    body.mobile-active #header #eventUrl,
+    body.mobile-active #header #raceUrl,
+    body.mobile-active #header .sep,
+    body.mobile-active #header .speed-wrap,
+    body.mobile-active #header #apiKeyInput { display: none !important; }
+    body.mobile-active #header .btn:not(#sssBtn):not(#switchModeBtn) { display: none !important; }
+
+    /* Hide desktop layout pieces */
+    body.mobile-active #sidebar-left,
+    body.mobile-active #sidebar-right,
+    body.mobile-active .resize-handle,
+    body.mobile-active .resize-handle-h,
+    body.mobile-active #raceControls,
+    body.mobile-active #scrubberWrap,
+    body.mobile-active #race-header,
+    body.mobile-active #vizWrap,
+    body.mobile-active #tableWrap,
+    body.mobile-active #spicyPanel { display: none !important; }
+    body.mobile-active #main { display: block; height: auto; overflow: visible; }
+    body.mobile-active #center { flex: none; overflow: visible; }
+
+    /* Mobile view */
+    body.mobile-active #mobileView {
+      display: block;
+      padding: 0 12px 32px;
+    }
+    .mobile-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #555555;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 16px 0 8px;
+    }
+    #mobile-analysis {
+      padding: 12px;
+      background: #111111;
+      border: 1px solid #222222;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #e0e0e0;
+    }
+    .mobile-chart-wrap { width: 100%; }
+    .mobile-chart-wrap svg { width: 100%; height: auto; }
+    body.mobile-active #mobile-drivers .compact-driver-row {
+      padding: 8px 4px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    #mobile-desktop-btn {
+      width: 100%;
+      margin-top: 24px;
+      padding: 12px;
+      font-size: 13px;
+    }
   </style>
 </head>
 <body>
