@@ -704,7 +704,7 @@
     <div id="spicyPanel">
       <div id="spicyPanelHeader">
         <div id="spicyPanelTitle">🔥 Spicy Analysis</div>
-        <button class="btn" style="font-size:13px;padding:4px 10px" onclick="generateSpicyAnalysis()">Regenerate</button>
+        <button class="btn" style="font-size:13px;padding:4px 10px" onclick="generateSpicyAnalysis(true)">Regenerate</button>
       </div>
       <div id="spicyScroll">
         <div id="spicyArea"></div>
@@ -1533,13 +1533,26 @@ function renderConsistency() {
 // ═══════════════════════════════════════════════════════════════
 //  Spicy Analysis  (Claude API)
 // ═══════════════════════════════════════════════════════════════
-async function generateSpicyAnalysis() {
+function spicyCacheKey() {
+  if (!currentHeat) return null;
+  const maxLap = currentHeat._posMap?.maxLap ?? 0;
+  const mode = isMobile() ? 'm' : 'd';
+  return `rc_spicy_${currentHeat.raceId}:${maxLap}:${mode}`;
+}
+
+async function generateSpicyAnalysis(force = false) {
   const area = document.getElementById(isMobile() ? 'mobile-analysis' : 'spicyArea');
   const key  = getApiKey();
 
   if (!key || !currentHeat) {
     area.innerHTML = `<span class="loading">Enter your Anthropic API key in the header to generate commentary.</span>`;
     return;
+  }
+
+  const cacheKey = spicyCacheKey();
+  if (!force && cacheKey) {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) { area.innerHTML = cached; return; }
   }
 
   const { results, className, heatName } = currentHeat;
@@ -1617,6 +1630,9 @@ ${summary}`;
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*([^*]+?)\*/g, '<em>$1</em>')
       .replace(/\n/g, '<br>');
+    if (cacheKey) {
+      try { localStorage.setItem(cacheKey, area.innerHTML); } catch {}
+    }
   } catch (err) {
     area.innerHTML = `<span class="error-msg">Error: ${escHtml(err.message)}</span>`;
   }
