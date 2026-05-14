@@ -34,8 +34,12 @@ npx serve -p 4321 .     # serve on localhost:4321 (matches .claude/launch.json f
 - Full mobile layout implemented (see Mobile Layout section below)
 - All 5 SVG charts now have `viewBox="0 0 ${W} ${H}"` for CSS scaling
 - `VIZ_MR` changed from `const` to `let` so mobile renders can temporarily reduce it
+- Spicy Analysis cached in `localStorage` (`rc_spicy_<raceId>:<maxLap>:<m|d>`); Regenerate button passes `force=true` to bypass
+- Mobile driver list switched from compact rows to full popup-style cards via `renderMobileDrivers()`
+- `parseRacePage` caps `r.lapTimes` to the official `r.laps` from the results table so transponder over-counts don't extend the chart past the official finish
+- `computePositionsByLap` snaps the **final lap** to `r.position` from the results table (cum-time can disagree with race-official finishing order)
 
-## Architecture: index.html (~2500 lines)
+## Architecture: index.html (~2800 lines)
 
 The file is structured as: `<style>` block → `<body>` HTML → `<script>` block.
 
@@ -68,7 +72,7 @@ The file is structured as: `<style>` block → `<body>` HTML → `<script>` bloc
 │  Position / Lap / Gap   │  ← all 5 charts stacked full-width, no animation
 │  Pace / Heatmap         │
 ├─────────────────────────┤
-│  Driver Cards           │  ← compact rows from renderStats()
+│  Driver Cards           │  ← full popup-style cards from renderMobileDrivers()
 ├─────────────────────────┤
 │  🖥 Desktop Version     │  ← sets localStorage forceDesktop=1, reloads
 └─────────────────────────┘
@@ -183,6 +187,7 @@ Calls **Gemini 2.5 Flash** API directly from the browser:
 - Output target: `#mobile-analysis` on mobile, `#spicyArea` on desktop
 - **Desktop prompt:** snarky pit-lane commentator — roast results with personality
 - **Mobile prompt:** facts-first race analyst — winner, fastest lap, battles, incidents, pace
+- **Cache:** rendered HTML stored in `localStorage` under `spicyCacheKey()` = `rc_spicy_<raceId>:<maxLap>:<m|d>`. Mobile/desktop cache separately (different prompts). A new lap busts the cache automatically (maxLap changes). The Regenerate button calls `generateSpicyAnalysis(true)` to skip cache and force a fresh API call.
 
 ### Incident algorithm (computeIncidents)
 
@@ -204,9 +209,14 @@ Each `result.lapMeta[i]` is `{ type: 'incident'|'clean'|'filtered', delta: ms }`
 ```js
 // Returns { posMap, maxLap }
 // posMap[driverName] = [pos_at_lap0, pos_at_lap1, ..., pos_at_maxLap]
-// lap 0 = qualifying grid position (result.qualPos)
-// lap N = rank by (lapsComplete DESC, cumulativeTime ASC)
+// lap 0      = qualifying grid position (result.qualPos)
+// lap 1..N-1 = rank by (lapsComplete DESC, cumulativeTime ASC)  ← approximation
+// lap N      = snap to r.position from the results table        ← authoritative
 ```
+
+The final-lap snap is necessary because transponder cum-time can disagree with the race-official finishing order — e.g. in race 6755597 (event 504950) Boyd hit lap 34 at ~293 s while Sole hit it at 301.194 s, but officials gave P1 to Sole. The intermediate-lap algorithm is still cum-time-based since the table only records final positions.
+
+`parseRacePage` also caps `r.lapTimes` to `r.laps` from the table before this runs — drops over-count transponder pings so the chart's X axis matches the official lap count.
 
 ## liverc.com HTML structure
 
@@ -258,6 +268,8 @@ Event 504950 has 21 heats. Race 6755593 has 4 drivers (MATT STEFANS, DYLAN HOFFM
 | `clearForceDesktop()` | Clears flag, reloads as mobile |
 | `renderMobileCharts()` | Render all 5 charts into #mobile-chart-* containers |
 | `renderMobileHeatList()` | Render tappable heat list into #mobile-heat-list |
+| `renderMobileDrivers()` | Render full popup-style driver cards into #mobile-drivers |
+| `spicyCacheKey()` | Build `rc_spicy_<raceId>:<maxLap>:<m\|d>` cache key |
 | `msToStr(ms)` | Format milliseconds as `m:ss.xxx` |
 
 ## Known gotchas
@@ -272,3 +284,5 @@ Event 504950 has 21 heats. Race 6755593 has 4 drivers (MATT STEFANS, DYLAN HOFFM
 - `getBoundingClientRect()` returns 0 on `display:none` elements — mobile chart render must temporarily un-hide `#vizWrap` off-screen before calling render functions
 - `VIZ_MR` is `let` (not `const`) so `renderMobileCharts()` can temporarily set it to 80 and restore after
 - Gemini API key is stored in `localStorage` key `rc_gemini_key` and also auto-loaded from `/env` on the proxy; free tier so no billing risk if key is exposed
+- Spicy Analysis cache lives in `localStorage` under `rc_spicy_*` keys — if a user wants to wipe all cached commentary, clear those keys (the Regenerate button only busts the *current* race's cache)
+- `r.position` from the results table is the source of truth for finishing order — `computePositionsByLap` snaps the final lap to it. If a future feature recomputes positions, follow the same convention to keep chart/sidebar consistent

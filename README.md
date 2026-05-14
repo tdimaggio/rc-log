@@ -37,12 +37,12 @@ Responsive design for screens ≤768px:
 - SSS dropdown and all controls in header
 - AI summary generates at top of page on completion
 - All 5 charts stacked full-width (no animation — renders instantly at race finish)
-- Driver cards below charts
+- Full driver cards stacked below charts — sparkline + grid→finish, best/avg lap, consistency, incidents, position changes (same content as desktop hover popup)
 - "🖥 Desktop Version" toggle button at bottom (uses localStorage)
 
 ### Other
 - **Incident detection** — any lap 2 s+ above the driver's top-5 average is flagged
-- **Spicy Analysis** — AI commentary via Gemini (API key required, masked input), roasts the results with actual lap times and driver names
+- **Spicy Analysis** — AI commentary via Gemini (API key required, masked input), roasts the results with actual lap times and driver names. Generated text is cached in `localStorage` keyed by `raceId:maxLap:mode` so refreshes don't burn quota; "Regenerate" button forces a fresh call
 - Scrubber bar + keyboard controls (Space = play/pause, ← → = step laps)
 - Resizable panels (drag the dividers)
 - Shareable URL hash — paste a liverc URL into the browser bar and share it
@@ -164,7 +164,7 @@ Only expose the static file server port (e.g. 4321) via Tailscale ACLs. Port 300
 
 | File | Purpose |
 |------|---------|
-| `index.html` | The entire app — HTML, CSS, and JS in one file (~2700 lines) |
+| `index.html` | The entire app — HTML, CSS, and JS in one file (~2800 lines) |
 | `src/index.js` | Cloudflare Worker entry point: CORS proxy, `/env` endpoint, static serving |
 | `wrangler.toml` | Cloudflare Workers config |
 | `proxy.mjs` | Local Node.js CORS proxy (port 3001) for dev, also serves `.env` Gemini key |
@@ -216,6 +216,7 @@ highlightedDriver  // driver name string, or null
 7. `renderVisualization()` dispatches to chart-specific render functions
 8. `renderStats()` builds compact driver rows; hover triggers `showDriverPopup()`
 9. `renderConsistency()` builds ranked bar chart in sidebar
+10. On mobile: `renderMobileCharts()` + `renderMobileDrivers()` + cached or fresh `generateSpicyAnalysis()`
 
 See `CLAUDE.md` for full architecture details, gotchas, and liverc HTML structure.
 
