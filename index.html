@@ -2515,7 +2515,8 @@ if (isMobile()) {
   document.body.classList.add('mobile-active');
 }
 if (window.innerWidth <= 768 && !isMobile()) {
-  document.getElementById('switchModeBtn').style.display = '';
+  const btn = document.getElementById('switchModeBtn');
+  if (btn) btn.style.display = '';
 }
 if (!document.getElementById('eventUrl').value) {
   const saved = localStorage.getItem('rc_last_event_url');
