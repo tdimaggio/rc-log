@@ -765,7 +765,7 @@
 const INCIDENT_THRESHOLD_MS = 2000;
 const FLOOR_FILTER_MS       = 4600;
 const VIZ_ML  = 30;   // left margin  (position labels)
-const VIZ_MR  = 140;  // right margin (driver name labels)
+let VIZ_MR  = 140;  // right margin (driver name labels)
 const VIZ_MT  = 16;   // top margin
 const VIZ_MB  = 30;   // bottom margin (lap number labels)
 const DRIVER_COLORS = ['#f0c040','#7ab8f5','#d04040','#40c080','#c870d8','#f09040','#60d8d8','#f06090'];
@@ -1422,6 +1422,8 @@ function renderMobileCharts() {
   const mobileW = (document.getElementById('mobileView').offsetWidth || window.innerWidth) - 24;
   vizWrap.style.cssText = `display:block !important;position:absolute;visibility:hidden;width:${mobileW}px;left:-9999px;top:0`;
 
+  const savedVizMR = VIZ_MR;
+  VIZ_MR = 80;
   modes.forEach(mode => {
     chartMode = mode;
     renderVisualization();
@@ -1429,6 +1431,7 @@ function renderMobileCharts() {
     if (dest) dest.innerHTML = document.getElementById('vizArea').innerHTML;
   });
   chartMode = saved;
+  VIZ_MR = savedVizMR;
   vizWrap.style.cssText = '';
 }
 
