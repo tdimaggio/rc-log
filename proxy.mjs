@@ -1,12 +1,15 @@
-// proxy.mjs — tiny local CORS proxy for rc-log.html
+// proxy.mjs — HTTPS server for rc-log.html
+// Serves the app at / and /rc-log.html, proxies liverc via /proxy, exposes .env via /env
 // Run:  node proxy.mjs
-// Keep running while using rc-log.html in the browser.
 import http from 'http';
 import https from 'https';
 import fs from 'fs';
 import { URL } from 'url';
 
-const PORT = 3001;
+const PORT = 4321;
+
+const CERT = fs.readFileSync(new URL('certs/nakedclaw.crt', import.meta.url));
+const KEY  = fs.readFileSync(new URL('certs/nakedclaw.key', import.meta.url));
 
 function readEnv() {
   try {
@@ -20,14 +23,22 @@ function readEnv() {
   } catch { return {}; }
 }
 
-const server = http.createServer((req, res) => {
+const server = https.createServer({ cert: CERT, key: KEY }, (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
 
   if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
   if (req.method !== 'GET')     { res.writeHead(405); res.end('GET only'); return; }
 
-  // ── /env — expose .env keys to the local browser ────────────────
+  // ── static — serve rc-log.html ───────────────────────────────────
+  if (req.url === '/' || req.url === '/rc-log.html') {
+    const html = fs.readFileSync(new URL('rc-log.html', import.meta.url));
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(html);
+    return;
+  }
+
+  // ── /env — expose .env keys to the browser ───────────────────────
   if (req.url === '/env') {
     const env = readEnv();
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -38,7 +49,7 @@ const server = http.createServer((req, res) => {
   // ── /proxy?url=... — CORS proxy ──────────────────────────────────
   let target;
   try {
-    const reqUrl = new URL(req.url, `http://localhost:${PORT}`);
+    const reqUrl = new URL(req.url, `https://localhost:${PORT}`);
     target = reqUrl.searchParams.get('url');
     if (!target) throw new Error('missing ?url=');
     new URL(target); // validate
@@ -70,7 +81,7 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`\n✅  RC-Log proxy listening on http://localhost:${PORT}`);
-  console.log('   Keep this terminal open while using rc-log.html\n');
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`\n✅  RC-Log listening on https://nakedclaw.tail86f5d2.ts.net:${PORT}`);
+  console.log(`   App: https://nakedclaw.tail86f5d2.ts.net:${PORT}/rc-log.html\n`);
 });

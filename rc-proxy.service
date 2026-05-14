@@ -1,0 +1,16 @@
+[Unit]
+Description=RC Race Replay HTTPS Server
+After=network-online.target tailscaled.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=tony
+WorkingDirectory=/home/tony/Projects/rc-html
+ExecStart=/usr/bin/node proxy.mjs
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target

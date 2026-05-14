@@ -1,15 +1,33 @@
 {
   "permissions": {
     "allow": [
-      "Bash(find /Users/tony/Projects/tdclaw -type f | head -60)",
-      "mcp__Claude_Preview__preview_start",
-      "Bash(node proxy.mjs)",
-      "Bash(curl -s \"http://localhost:3001/proxy?url=https%3A%2F%2Fssspeedway.liverc.com%2Fresults%2F%3Fp%3Dview_race_result%26id%3D6755593\")",
-      "Bash(lsof -ti:3001)",
-      "Bash(xargs kill -9)",
-      "Bash(git init *)",
-      "Bash(git remote *)",
-      "Bash(git add *)"
+      "Bash(git clone *)",
+      "Bash(rsync -a --exclude='.claude' /tmp/rc-log-clone/ /home/tony/Projects/rc-html/)",
+      "Bash(rm -rf /tmp/rc-log-clone)",
+      "Bash(tailscale status *)",
+      "Bash(tailscale --version)",
+      "Bash(tailscale serve *)",
+      "Bash(pm2 list *)",
+      "Bash(systemctl cat *)",
+      "Bash(openssl x509 *)",
+      "Bash(tailscale cert *)",
+      "Bash(sudo tailscale *)",
+      "Bash(cp /home/tony/Projects/rc-html/certs/nakedclaw.crt /opt/tdclaw/certs/nakedclaw.crt)",
+      "Bash(cp /home/tony/Projects/rc-html/certs/nakedclaw.key /opt/tdclaw/certs/nakedclaw.key)",
+      "Bash(sudo cp /home/tony/Projects/rc-html/rc-proxy.service /etc/systemd/system/rc-proxy.service)",
+      "Bash(sudo systemctl daemon-reload)",
+      "Bash(sudo systemctl enable rc-proxy)",
+      "Bash(sudo systemctl start rc-proxy)",
+      "Bash(sudo systemctl status rc-proxy --no-pager)",
+      "Bash(node *)",
+      "Bash(rtk proxy *)",
+      "Bash(echo \"PID: $!\")",
+      "Read(//tmp/**)",
+      "Bash(curl -s \"http://localhost:8788/proxy\")",
+      "Bash(curl -s \"http://localhost:8788/proxy?url=https://example.com\")",
+      "Bash(curl -si \"http://localhost:8788/proxy?url=https://ssspeedway.liverc.com/results/?p=view_race_result%26id=6755593\")",
+      "Bash(curl -s \"http://localhost:8788/env\")",
+      "Bash(git remote *)"
     ]
   }
 }
