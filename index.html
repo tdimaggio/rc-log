@@ -1369,6 +1369,19 @@ function renderStats() {
   }).join('');
 }
 
+function renderMobileCharts() {
+  if (!currentHeat) return;
+  const modes = ['position', 'laptime', 'gap', 'pace', 'heatmap'];
+  const saved = chartMode;
+  modes.forEach(mode => {
+    chartMode = mode;
+    renderVisualization();
+    const dest = document.getElementById(`mobile-chart-${mode}`);
+    if (dest) dest.innerHTML = document.getElementById('vizArea').innerHTML;
+  });
+  chartMode = saved;
+}
+
 function showDriverPopup(el, driverName, colorIdx) {
   if (!currentHeat) return;
   const driver = currentHeat.results.find(r => r.driverName === driverName);
